@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Register | CrowdSolve</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+
+<body class="auth-body">
+
+
+    <!-- =====================================================
+         AUTH NAVIGATION
+    ====================================================== -->
+
+    <nav class="auth-navbar">
+
+        <a href="/" class="logo">
+            Crowd<span>Solve</span>
+        </a>
+
+        <a href="/" class="back-home">
+            ← Back to Home
+        </a>
+
+    </nav>
+
+
+    <!-- =====================================================
+         REGISTRATION SECTION
+    ====================================================== -->
+
+    <main class="auth-container">
+
+        <div class="auth-card register-card">
+
+
+            <!-- HEADER -->
+
+            <div class="auth-header">
+
+                <span class="section-tag">
+                    CREATE ACCOUNT
+                </span>
+
+                <h1>
+                    Join CrowdSolve
+                </h1>
+
+                <p>
+                    Choose your role and become part of the
+                    crowdsourced problem-solving platform.
+                </p>
+
+            </div>
+
+
+            <!-- =================================================
+                 MESSAGE BOX
+            ================================================== -->
+
+            <div
+                id="messageBox"
+                class="message-box hidden"
+            ></div>
+
+
+            <!-- =================================================
+                 REGISTRATION FORM
+            ================================================== -->
+
+            <form
+                id="registerForm"
+                class="auth-form"
+            >
+
+
+                <!-- USERNAME -->
+
+                <div class="form-group">
+
+                    <label for="username">
+                        Username
+                    </label>
+
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Choose a username"
+                        required
+                        minlength="3"
+                        autocomplete="username"
+                    >
+
+                </div>
+
+
+                <!-- EMAIL -->
+
+                <div class="form-group">
+
+                    <label for="email">
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        required
+                        autocomplete="email"
+                    >
+
+                </div>
+
+
+                <!-- PASSWORD -->
+
+                <div class="form-group">
+
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <div class="password-wrapper">
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Create a password"
+                            required
+                            minlength="6"
+                            autocomplete="new-password"
+                        >
+
+                        <button
+                            type="button"
+                            id="togglePassword"
+                            class="password-toggle"
+                            aria-label="Show password"
+                        >
+                            Show
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CONFIRM PASSWORD -->
+
+                <div class="form-group">
+
+                    <label for="confirmPassword">
+                        Confirm Password
+                    </label>
+
+                    <div class="password-wrapper">
+
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            placeholder="Confirm your password"
+                            required
+                            minlength="6"
+                            autocomplete="new-password"
+                        >
+
+                        <button
+                            type="button"
+                            id="toggleConfirmPassword"
+                            class="password-toggle"
+                            aria-label="Show password"
+                        >
+                            Show
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     ROLE SELECTION
+                ================================================== -->
+
+                <div class="form-group">
+
+                    <label>
+                        Choose Your Role
+                    </label>
+
+
+                    <div class="role-selection">
+
+
+                        <!-- PROBLEMER -->
+
+                        <label
+                            class="role-option"
+                            for="problemer"
+                        >
+
+                            <input
+                                type="radio"
+                                id="problemer"
+                                name="role"
+                                value="problemer"
+                                required
+                            >
+
+                            <div class="role-option-content">
+
+                                <div class="role-option-icon">
+                                    P
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        Problemer
+                                    </strong>
+
+                                    <span>
+                                        Post problems and receive
+                                        multiple solutions.
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </label>
+
+
+                        <!-- SOLVER -->
+
+                        <label
+                            class="role-option"
+                            for="solver"
+                        >
+
+                            <input
+                                type="radio"
+                                id="solver"
+                                name="role"
+                                value="solver"
+                                required
+                            >
+
+                            <div class="role-option-content">
+
+                                <div class="role-option-icon">
+                                    S
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        Solver
+                                    </strong>
+
+                                    <span>
+                                        Browse problems and submit
+                                        your solutions.
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SUBMIT -->
+
+                <button
+                    type="submit"
+                    id="registerButton"
+                    class="btn btn-primary auth-submit"
+                >
+                    Create Account
+                </button>
+
+            </form>
+
+
+            <!-- LOGIN LINK -->
+
+            <div class="auth-footer">
+
+                <p>
+                    Already have an account?
+                </p>
+
+                <a
+                    href="{{ url_for('login_page') }}"
+                >
+                    Login
+                </a>
+
+            </div>
+
+
+            <!-- PLATFORM INFO -->
+
+            <div class="auth-info">
+
+                <strong>
+                    CrowdSolve Platform
+                </strong>
+
+                <span>
+                    Problems are classified using TF-IDF
+                    feature extraction and a trained
+                    Logistic Regression model.
+                </span>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- =====================================================
+         MAIN JAVASCRIPT
+    ====================================================== -->
+
+    <script
+        src="{{ url_for('static', filename='js/app.js') }}"
+    ></script>
+
+
+    <!-- =====================================================
+         REGISTRATION LOGIC
+    ====================================================== -->
+
+    <script>
+
+        const registerForm =
+            document.getElementById("registerForm");
+
+        const messageBox =
+            document.getElementById("messageBox");
+
+        const registerButton =
+            document.getElementById("registerButton");
+
+
+        // ====================================================
+        // PASSWORD VISIBILITY
+        // ====================================================
+
+        function setupPasswordToggle(
+            inputId,
+            buttonId
+        ) {
+
+            const passwordInput =
+                document.getElementById(
+                    inputId
+                );
+
+            const toggleButton =
+                document.getElementById(
+                    buttonId
+                );
+
+
+            toggleButton.addEventListener(
+                "click",
+                function () {
+
+                    if (
+                        passwordInput.type ===
+                        "password"
+                    ) {
+
+                        passwordInput.type =
+                            "text";
+
+                        toggleButton.textContent =
+                            "Hide";
+
+                    }
+
+                    else {
+
+                        passwordInput.type =
+                            "password";
+
+                        toggleButton.textContent =
+                            "Show";
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        setupPasswordToggle(
+            "password",
+            "togglePassword"
+        );
+
+
+        setupPasswordToggle(
+            "confirmPassword",
+            "toggleConfirmPassword"
+        );
+
+
+        // ====================================================
+        // DISPLAY MESSAGE
+        // ====================================================
+
+        function showMessage(
+            message,
+            type
+        ) {
+
+            messageBox.textContent =
+                message;
+
+            messageBox.className =
+                "message-box " + type;
+
+        }
+
+
+        // ====================================================
+        // REGISTRATION SUBMISSION
+        // ====================================================
+
+        registerForm.addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+
+                const username =
+                    document
+                        .getElementById("username")
+                        .value
+                        .trim();
+
+
+                const email =
+                    document
+                        .getElementById("email")
+                        .value
+                        .trim();
+
+
+                const password =
+                    document
+                        .getElementById("password")
+                        .value;
+
+
+                const confirmPassword =
+                    document
+                        .getElementById(
+                            "confirmPassword"
+                        )
+                        .value;
+
+
+                const selectedRole =
+                    document.querySelector(
+                        'input[name="role"]:checked'
+                    );
+
+
+                // =============================================
+                // VALIDATE PASSWORD
+                // =============================================
+
+                if (
+                    password !== confirmPassword
+                ) {
+
+                    showMessage(
+                        "Passwords do not match.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                // =============================================
+                // VALIDATE ROLE
+                // =============================================
+
+                if (!selectedRole) {
+
+                    showMessage(
+                        "Please select a role.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                const role =
+                    selectedRole.value;
+
+
+                // =============================================
+                // DISABLE BUTTON
+                // =============================================
+
+                registerButton.disabled =
+                    true;
+
+                registerButton.textContent =
+                    "Creating Account...";
+
+
+                try {
+
+                    // =========================================
+                    // CALL BACKEND API
+                    // =========================================
+
+                    const response =
+                        await fetch(
+                            "/api/register",
+                            {
+
+                                method: "POST",
+
+                                headers: {
+
+                                    "Content-Type":
+                                        "application/json"
+
+                                },
+
+                                body: JSON.stringify({
+
+                                    username: username,
+
+                                    email: email,
+
+                                    password: password,
+
+                                    role: role
+
+                                })
+
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    // =========================================
+                    // SUCCESS
+                    // =========================================
+
+                    if (
+                        response.ok &&
+                        data.success
+                    ) {
+
+                        showMessage(
+                            "Account created successfully. Redirecting to login...",
+                            "success"
+                        );
+
+
+                        registerForm.reset();
+
+
+                        setTimeout(
+                            function () {
+
+                                window.location.href =
+                                    "/login";
+
+                            },
+
+                            1000
+
+                        );
+
+                    }
+
+
+                    // =========================================
+                    // ERROR RESPONSE
+                    // =========================================
+
+                    else {
+
+                        showMessage(
+
+                            data.message ||
+                            "Registration failed. Please try again.",
+
+                            "error"
+
+                        );
+
+
+                        registerButton.disabled =
+                            false;
+
+                        registerButton.textContent =
+                            "Create Account";
+
+                    }
+
+                }
+
+
+                // =============================================
+                // CONNECTION ERROR
+                // =============================================
+
+                catch (error) {
+
+                    console.error(
+                        "Registration error:",
+                        error
+                    );
+
+
+                    showMessage(
+
+                        "Unable to connect to the server. Please make sure the backend is running.",
+
+                        "error"
+
+                    );
+
+
+                    registerButton.disabled =
+                        false;
+
+                    registerButton.textContent =
+                        "Create Account";
+
+                }
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>

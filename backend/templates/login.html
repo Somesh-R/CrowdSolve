@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Login | CrowdSolve</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+
+<body class="auth-body">
+
+
+    <!-- =====================================================
+         AUTH NAVIGATION
+    ====================================================== -->
+
+    <nav class="auth-navbar">
+
+        <a href="/" class="logo">
+            Crowd<span>Solve</span>
+        </a>
+
+        <a href="/" class="back-home">
+            ← Back to Home
+        </a>
+
+    </nav>
+
+
+    <!-- =====================================================
+         LOGIN SECTION
+    ====================================================== -->
+
+    <main class="auth-container">
+
+        <div class="auth-card">
+
+
+            <!-- HEADER -->
+
+            <div class="auth-header">
+
+                <span class="section-tag">
+                    WELCOME BACK
+                </span>
+
+                <h1>
+                    Login to CrowdSolve
+                </h1>
+
+                <p>
+                    Access your dashboard and continue solving
+                    problems together.
+                </p>
+
+            </div>
+
+
+            <!-- ERROR / SUCCESS MESSAGE -->
+
+            <div
+                id="messageBox"
+                class="message-box hidden"
+            ></div>
+
+
+            <!-- LOGIN FORM -->
+
+            <form
+                id="loginForm"
+                class="auth-form"
+            >
+
+
+                <!-- EMAIL -->
+
+                <div class="form-group">
+
+                    <label for="email">
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        required
+                        autocomplete="email"
+                    >
+
+                </div>
+
+
+                <!-- PASSWORD -->
+
+                <div class="form-group">
+
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <div class="password-wrapper">
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            required
+                            autocomplete="current-password"
+                        >
+
+                        <button
+                            type="button"
+                            id="togglePassword"
+                            class="password-toggle"
+                            aria-label="Show password"
+                        >
+                            Show
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SUBMIT -->
+
+                <button
+                    type="submit"
+                    id="loginButton"
+                    class="btn btn-primary auth-submit"
+                >
+                    Login
+                </button>
+
+            </form>
+
+
+            <!-- REGISTER LINK -->
+
+            <div class="auth-footer">
+
+                <p>
+                    Don't have an account?
+                </p>
+
+                <a
+                    href="{{ url_for('register_page') }}"
+                >
+                    Create an Account
+                </a>
+
+            </div>
+
+
+            <!-- ML NOTE -->
+
+            <div class="auth-info">
+
+                <strong>
+                    CrowdSolve Platform
+                </strong>
+
+                <span>
+                    AI-powered crowdsourced problem solving
+                    using TF-IDF and Logistic Regression.
+                </span>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script
+        src="{{ url_for('static', filename='js/app.js') }}"
+    ></script>
+
+
+    <!-- =====================================================
+         LOGIN LOGIC
+    ====================================================== -->
+
+    <script>
+
+        const loginForm =
+            document.getElementById("loginForm");
+
+        const messageBox =
+            document.getElementById("messageBox");
+
+        const loginButton =
+            document.getElementById("loginButton");
+
+        const passwordInput =
+            document.getElementById("password");
+
+        const togglePassword =
+            document.getElementById("togglePassword");
+
+
+        // ====================================================
+        // SHOW / HIDE PASSWORD
+        // ====================================================
+
+        togglePassword.addEventListener(
+            "click",
+            function () {
+
+                if (
+                    passwordInput.type === "password"
+                ) {
+
+                    passwordInput.type = "text";
+
+                    togglePassword.textContent =
+                        "Hide";
+
+                }
+
+                else {
+
+                    passwordInput.type =
+                        "password";
+
+                    togglePassword.textContent =
+                        "Show";
+
+                }
+
+            }
+        );
+
+
+        // ====================================================
+        // DISPLAY MESSAGE
+        // ====================================================
+
+        function showMessage(
+            message,
+            type
+        ) {
+
+            messageBox.textContent =
+                message;
+
+            messageBox.className =
+                "message-box " + type;
+
+        }
+
+
+        // ====================================================
+        // LOGIN FORM SUBMISSION
+        // ====================================================
+
+        loginForm.addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+
+                const email =
+                    document
+                        .getElementById("email")
+                        .value
+                        .trim();
+
+
+                const password =
+                    document
+                        .getElementById("password")
+                        .value;
+
+
+                loginButton.disabled =
+                    true;
+
+                loginButton.textContent =
+                    "Logging in...";
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "/api/login",
+                            {
+
+                                method: "POST",
+
+                                headers: {
+
+                                    "Content-Type":
+                                        "application/json"
+
+                                },
+
+                                body: JSON.stringify({
+
+                                    email: email,
+
+                                    password: password
+
+                                })
+
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (
+                        response.ok &&
+                        data.success
+                    ) {
+
+                        showMessage(
+                            "Login successful. Redirecting...",
+                            "success"
+                        );
+
+
+                        /*
+                        ------------------------------------------------
+                        STORE USER INFORMATION
+
+                        The exact field names are handled safely
+                        so the frontend can work with the backend
+                        response structure.
+                        ------------------------------------------------
+                        */
+
+                        const user =
+                            data.user || data;
+
+
+                        localStorage.setItem(
+
+                            "crowdsolve_user",
+
+                            JSON.stringify(
+                                user
+                            )
+
+                        );
+
+
+                        /*
+                        ------------------------------------------------
+                        REDIRECT BASED ON USER ROLE
+                        ------------------------------------------------
+                        */
+
+                        setTimeout(
+                            function () {
+
+                                if (
+                                    user.role ===
+                                    "problemer"
+                                ) {
+
+                                    window.location.href =
+                                        "/problemer-dashboard";
+
+                                }
+
+                                else if (
+                                    user.role ===
+                                    "solver"
+                                ) {
+
+                                    window.location.href =
+                                        "/solver-dashboard";
+
+                                }
+
+                                else {
+
+                                    showMessage(
+
+                                        "Login succeeded, but the user role is invalid.",
+
+                                        "error"
+
+                                    );
+
+                                    loginButton.disabled =
+                                        false;
+
+                                    loginButton.textContent =
+                                        "Login";
+
+                                }
+
+                            },
+
+                            700
+
+                        );
+
+                    }
+
+                    else {
+
+                        showMessage(
+
+                            data.message ||
+                            "Login failed. Please check your credentials.",
+
+                            "error"
+
+                        );
+
+
+                        loginButton.disabled =
+                            false;
+
+                        loginButton.textContent =
+                            "Login";
+
+                    }
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "Login error:",
+                        error
+                    );
+
+
+                    showMessage(
+
+                        "Unable to connect to the server. Please make sure the backend is running.",
+
+                        "error"
+
+                    );
+
+
+                    loginButton.disabled =
+                        false;
+
+                    loginButton.textContent =
+                        "Login";
+
+                }
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>

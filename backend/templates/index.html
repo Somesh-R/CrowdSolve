@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>CrowdSolve | AI-Powered Problem Solving</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+
+<body>
+
+    <!-- =====================================================
+         NAVIGATION BAR
+    ====================================================== -->
+
+    <nav class="navbar">
+
+        <div class="nav-container">
+
+            <a href="/" class="logo">
+                Crowd<span>Solve</span>
+            </a>
+
+
+            <div class="nav-links">
+
+                <a href="#how-it-works">
+                    How It Works
+                </a>
+
+                <a href="{{ url_for('login_page') }}">
+                    Login
+                </a>
+
+                <a
+                    href="{{ url_for('register_page') }}"
+                    class="btn btn-primary"
+                >
+                    Get Started
+                </a>
+
+            </div>
+
+        </div>
+
+    </nav>
+
+
+    <!-- =====================================================
+         HERO SECTION
+    ====================================================== -->
+
+    <section class="hero">
+
+        <div class="hero-content">
+
+            <div class="hero-badge">
+                AI-Powered Crowdsourced Problem Solving
+            </div>
+
+
+            <h1>
+                Post a Problem.
+                <br>
+
+                <span>
+                    Let the Right Minds Solve It.
+                </span>
+            </h1>
+
+
+            <p class="hero-description">
+
+                CrowdSolve uses Machine Learning and TF-IDF
+                text classification to automatically identify
+                the domain of your problem and make it available
+                to expert solvers.
+
+            </p>
+
+
+            <div class="hero-buttons">
+
+                <a
+                    href="{{ url_for('register_page') }}"
+                    class="btn btn-primary btn-large"
+                >
+                    Get Started
+                </a>
+
+
+                <a
+                    href="#how-it-works"
+                    class="btn btn-secondary btn-large"
+                >
+                    See How It Works
+                </a>
+
+            </div>
+
+
+            <!-- ML INFORMATION -->
+
+            <div class="ml-info">
+
+                <div class="ml-info-item">
+
+                    <strong>
+                        TF-IDF
+                    </strong>
+
+                    <span>
+                        Text Vectorization
+                    </span>
+
+                </div>
+
+
+                <div class="ml-divider"></div>
+
+
+                <div class="ml-info-item">
+
+                    <strong>
+                        Logistic Regression
+                    </strong>
+
+                    <span>
+                        Problem Classification
+                    </span>
+
+                </div>
+
+
+                <div class="ml-divider"></div>
+
+
+                <div class="ml-info-item">
+
+                    <strong>
+                        10 Categories
+                    </strong>
+
+                    <span>
+                        Technology Domains
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         HOW IT WORKS
+    ====================================================== -->
+
+    <section
+        class="how-it-works"
+        id="how-it-works"
+    >
+
+        <div class="section-header">
+
+            <span class="section-tag">
+                WORKFLOW
+            </span>
+
+            <h2>
+                How CrowdSolve Works
+            </h2>
+
+            <p>
+                From problem submission to multiple solutions,
+                powered by Machine Learning.
+            </p>
+
+        </div>
+
+
+        <div class="workflow-container">
+
+
+            <!-- STEP 1 -->
+
+            <div class="workflow-card">
+
+                <div class="step-number">
+                    01
+                </div>
+
+                <div class="step-icon">
+                    P
+                </div>
+
+                <h3>
+                    Post a Problem
+                </h3>
+
+                <p>
+                    A user submits a technical problem
+                    through the CrowdSolve platform.
+                </p>
+
+            </div>
+
+
+            <div class="workflow-arrow">
+                →
+            </div>
+
+
+            <!-- STEP 2 -->
+
+            <div class="workflow-card">
+
+                <div class="step-number">
+                    02
+                </div>
+
+                <div class="step-icon">
+                    ML
+                </div>
+
+                <h3>
+                    ML Classification
+                </h3>
+
+                <p>
+                    The problem is preprocessed, converted
+                    using TF-IDF, and classified by the
+                    trained Logistic Regression model.
+                </p>
+
+            </div>
+
+
+            <div class="workflow-arrow">
+                →
+            </div>
+
+
+            <!-- STEP 3 -->
+
+            <div class="workflow-card">
+
+                <div class="step-number">
+                    03
+                </div>
+
+                <div class="step-icon">
+                    S
+                </div>
+
+                <h3>
+                    Solver Pool
+                </h3>
+
+                <p>
+                    The classified problem appears in the
+                    common problem pool where expert solvers
+                    can choose problems to solve.
+                </p>
+
+            </div>
+
+
+            <div class="workflow-arrow">
+                →
+            </div>
+
+
+            <!-- STEP 4 -->
+
+            <div class="workflow-card">
+
+                <div class="step-number">
+                    04
+                </div>
+
+                <div class="step-icon">
+                    ✓
+                </div>
+
+                <h3>
+                    Multiple Solutions
+                </h3>
+
+                <p>
+                    Multiple solvers can submit their
+                    solutions, allowing the problem owner
+                    to evaluate different approaches.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         MACHINE LEARNING SECTION
+    ====================================================== -->
+
+    <section class="ml-section">
+
+        <div class="section-header">
+
+            <span class="section-tag">
+                MACHINE LEARNING METHODS
+            </span>
+
+            <h2>
+                Transparent Problem Classification
+            </h2>
+
+            <p>
+                The classification process is visible in
+                the application so the Machine Learning
+                workflow can be demonstrated clearly.
+            </p>
+
+        </div>
+
+
+        <div class="ml-pipeline">
+
+
+            <div class="pipeline-step">
+
+                <div class="pipeline-label">
+                    INPUT
+                </div>
+
+                <h3>
+                    Raw Problem
+                </h3>
+
+                <p>
+                    User-submitted technical problem.
+                </p>
+
+            </div>
+
+
+            <div class="pipeline-arrow">
+                ↓
+            </div>
+
+
+            <div class="pipeline-step">
+
+                <div class="pipeline-label">
+                    NLP
+                </div>
+
+                <h3>
+                    Text Preprocessing
+                </h3>
+
+                <p>
+                    Lowercasing, tokenization, stopword
+                    removal and text cleaning.
+                </p>
+
+            </div>
+
+
+            <div class="pipeline-arrow">
+                ↓
+            </div>
+
+
+            <div class="pipeline-step">
+
+                <div class="pipeline-label">
+                    FEATURE EXTRACTION
+                </div>
+
+                <h3>
+                    TF-IDF Vectorization
+                </h3>
+
+                <p>
+                    Text converted into numerical features.
+                </p>
+
+            </div>
+
+
+            <div class="pipeline-arrow">
+                ↓
+            </div>
+
+
+            <div class="pipeline-step pipeline-highlight">
+
+                <div class="pipeline-label">
+                    MACHINE LEARNING
+                </div>
+
+                <h3>
+                    Logistic Regression
+                </h3>
+
+                <p>
+                    Predicts the most appropriate technology
+                    category with a confidence score.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         USER ROLES
+    ====================================================== -->
+
+    <section class="roles-section">
+
+        <div class="section-header">
+
+            <span class="section-tag">
+                PLATFORM USERS
+            </span>
+
+            <h2>
+                Two Roles. One Problem-Solving Network.
+            </h2>
+
+        </div>
+
+
+        <div class="roles-container">
+
+
+            <!-- PROBLEMER -->
+
+            <div class="role-card">
+
+                <div class="role-label">
+                    PROBLEMER
+                </div>
+
+                <h3>
+                    Need a Problem Solved?
+                </h3>
+
+                <p>
+                    Submit your problem and receive multiple
+                    solutions from available expert solvers.
+                </p>
+
+                <ul>
+
+                    <li>
+                        Submit technical problems
+                    </li>
+
+                    <li>
+                        View ML classification
+                    </li>
+
+                    <li>
+                        Receive multiple solutions
+                    </li>
+
+                    <li>
+                        Evaluate submitted answers
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+            <!-- SOLVER -->
+
+            <div class="role-card">
+
+                <div class="role-label">
+                    SOLVER
+                </div>
+
+                <h3>
+                    Solve Problems in Your Expertise
+                </h3>
+
+                <p>
+                    Browse the common problem pool and choose
+                    problems related to your expertise.
+                </p>
+
+                <ul>
+
+                    <li>
+                        Browse available problems
+                    </li>
+
+                    <li>
+                        Filter by ML category
+                    </li>
+
+                    <li>
+                        Select problems to solve
+                    </li>
+
+                    <li>
+                        Submit detailed solutions
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         CALL TO ACTION
+    ====================================================== -->
+
+    <section class="cta-section">
+
+        <h2>
+            Ready to Solve Problems Together?
+        </h2>
+
+        <p>
+            Join CrowdSolve and experience AI-powered
+            crowdsourced problem solving.
+        </p>
+
+        <a
+            href="{{ url_for('register_page') }}"
+            class="btn btn-primary btn-large"
+        >
+            Create an Account
+        </a>
+
+    </section>
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <footer class="footer">
+
+        <div class="footer-container">
+
+            <div>
+
+                <h3>
+                    Crowd<span>Solve</span>
+                </h3>
+
+                <p>
+                    AI-powered crowdsourced problem-solving
+                    platform.
+                </p>
+
+            </div>
+
+
+            <div class="footer-ml">
+
+                <strong>
+                    Machine Learning Methods
+                </strong>
+
+                <span>
+                    TF-IDF Vectorization
+                </span>
+
+                <span>
+                    Logistic Regression Classification
+                </span>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script
+        src="{{ url_for('static', filename='js/app.js') }}"
+    ></script>
+
+</body>
+
+</html>

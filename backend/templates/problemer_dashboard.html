@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Problemer Dashboard | CrowdSolve</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+
+<body class="dashboard-body">
+
+
+    <!-- =====================================================
+         NAVIGATION
+    ====================================================== -->
+
+    <nav class="dashboard-navbar">
+
+        <a href="/" class="logo">
+            Crowd<span>Solve</span>
+        </a>
+
+
+        <div class="dashboard-nav-right">
+
+            <span
+                id="welcomeUser"
+                class="welcome-user"
+            >
+                Loading...
+            </span>
+
+
+            <span class="role-badge">
+                PROBLEMER
+            </span>
+
+
+            <button
+                id="logoutButton"
+                class="btn btn-secondary btn-small"
+            >
+                Logout
+            </button>
+
+        </div>
+
+    </nav>
+
+
+    <!-- =====================================================
+         MAIN DASHBOARD
+    ====================================================== -->
+
+    <main class="dashboard-container">
+
+
+        <!-- =================================================
+             DASHBOARD HEADER
+        ================================================== -->
+
+        <section class="dashboard-header">
+
+            <div>
+
+                <span class="section-tag">
+                    PROBLEMER DASHBOARD
+                </span>
+
+                <h1>
+                    Submit a Problem
+                </h1>
+
+                <p>
+                    Describe your problem. CrowdSolve will use
+                    TF-IDF and the trained Machine Learning model
+                    to classify it automatically.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             MAIN GRID
+        ================================================== -->
+
+        <div class="problemer-grid">
+
+
+            <!-- =============================================
+                 LEFT SIDE: PROBLEM SUBMISSION
+            ============================================== -->
+
+            <section class="dashboard-card problem-form-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <h2>
+                            New Problem
+                        </h2>
+
+                        <p>
+                            Enter a detailed description of the
+                            problem you need solved.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- MESSAGE BOX -->
+
+                <div
+                    id="messageBox"
+                    class="message-box hidden"
+                ></div>
+
+
+                <!-- PROBLEM FORM -->
+
+                <form id="problemForm">
+
+
+                    <!-- PROBLEM TITLE -->
+
+                    <div class="form-group">
+
+                        <label for="problemTitle">
+                            Problem Title
+                        </label>
+
+                        <input
+                            type="text"
+                            id="problemTitle"
+                            placeholder="Example: Unable to optimize database query performance"
+                            required
+                            maxlength="200"
+                        >
+
+                    </div>
+
+
+                    <!-- PROBLEM DESCRIPTION -->
+
+                    <div class="form-group">
+
+                        <label for="problemDescription">
+                            Problem Description
+                        </label>
+
+                        <textarea
+                            id="problemDescription"
+                            placeholder="Describe your problem in detail. Include relevant technical information so the Machine Learning model can classify the problem accurately..."
+                            required
+                            rows="10"
+                        ></textarea>
+
+                        <div class="input-info">
+
+                            <span>
+                                The description will be processed
+                                using the trained ML pipeline.
+                            </span>
+
+                            <span id="characterCount">
+                                0 characters
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- SUBMIT -->
+
+                    <button
+                        type="submit"
+                        id="submitProblemButton"
+                        class="btn btn-primary submit-problem-button"
+                    >
+                        Classify and Post Problem
+                    </button>
+
+                </form>
+
+            </section>
+
+
+            <!-- =============================================
+                 RIGHT SIDE: ML PIPELINE
+            ============================================== -->
+
+            <aside class="ml-panel">
+
+
+                <div class="dashboard-card ml-process-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <span class="section-tag">
+                                LIVE ML PROCESS
+                            </span>
+
+                            <h2>
+                                Problem Classification
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ML PIPELINE -->
+
+                    <div class="classification-pipeline">
+
+
+                        <!-- STEP 1 -->
+
+                        <div
+                            class="classification-step"
+                            id="stepInput"
+                        >
+
+                            <div class="pipeline-step-number">
+                                1
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    Raw Problem Text
+                                </strong>
+
+                                <p>
+                                    User problem submitted
+                                    to the system.
+                                </p>
+
+                            </div>
+
+                            <span class="step-status">
+                                Waiting
+                            </span>
+
+                        </div>
+
+
+                        <!-- ARROW -->
+
+                        <div class="pipeline-connector">
+                            ↓
+                        </div>
+
+
+                        <!-- STEP 2 -->
+
+                        <div
+                            class="classification-step"
+                            id="stepPreprocessing"
+                        >
+
+                            <div class="pipeline-step-number">
+                                2
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    Text Preprocessing
+                                </strong>
+
+                                <p>
+                                    Text cleaning and preprocessing.
+                                </p>
+
+                            </div>
+
+                            <span class="step-status">
+                                Waiting
+                            </span>
+
+                        </div>
+
+
+                        <!-- ARROW -->
+
+                        <div class="pipeline-connector">
+                            ↓
+                        </div>
+
+
+                        <!-- STEP 3 -->
+
+                        <div
+                            class="classification-step"
+                            id="stepTfidf"
+                        >
+
+                            <div class="pipeline-step-number">
+                                3
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    TF-IDF Vectorization
+                                </strong>
+
+                                <p>
+                                    Convert text into numerical
+                                    feature vectors.
+                                </p>
+
+                            </div>
+
+                            <span class="step-status">
+                                Waiting
+                            </span>
+
+                        </div>
+
+
+                        <!-- ARROW -->
+
+                        <div class="pipeline-connector">
+                            ↓
+                        </div>
+
+
+                        <!-- STEP 4 -->
+
+                        <div
+                            class="classification-step"
+                            id="stepModel"
+                        >
+
+                            <div class="pipeline-step-number">
+                                4
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    Machine Learning Model
+                                </strong>
+
+                                <p>
+                                    Logistic Regression predicts
+                                    the problem category.
+                                </p>
+
+                            </div>
+
+                            <span class="step-status">
+                                Waiting
+                            </span>
+
+                        </div>
+
+
+                        <!-- ARROW -->
+
+                        <div class="pipeline-connector">
+                            ↓
+                        </div>
+
+
+                        <!-- RESULT -->
+
+                        <div
+                            class="prediction-result"
+                            id="predictionResult"
+                        >
+
+                            <span class="prediction-label">
+                                PREDICTION RESULT
+                            </span>
+
+                            <h3 id="predictedCategory">
+                                Waiting for problem...
+                            </h3>
+
+                            <div class="confidence-container">
+
+                                <div class="confidence-header">
+
+                                    <span>
+                                        Confidence
+                                    </span>
+
+                                    <strong
+                                        id="confidenceValue"
+                                    >
+                                        —
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="confidence-bar">
+
+                                    <div
+                                        id="confidenceProgress"
+                                        class="confidence-progress"
+                                        style="width: 0%;"
+                                    ></div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+                <!-- ML MODEL INFORMATION -->
+
+                <div class="dashboard-card model-info-card">
+
+                    <h3>
+                        Model Information
+                    </h3>
+
+                    <div class="model-info-row">
+
+                        <span>
+                            Feature Extraction
+                        </span>
+
+                        <strong>
+                            TF-IDF
+                        </strong>
+
+                    </div>
+
+                    <div class="model-info-row">
+
+                        <span>
+                            Classification Algorithm
+                        </span>
+
+                        <strong>
+                            Logistic Regression
+                        </strong>
+
+                    </div>
+
+                    <div class="model-info-row">
+
+                        <span>
+                            Output
+                        </span>
+
+                        <strong>
+                            Problem Category
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </aside>
+
+        </div>
+
+
+        <!-- =================================================
+             MY PROBLEMS
+        ================================================== -->
+
+        <section class="my-problems-section">
+
+            <div class="section-title-row">
+
+                <div>
+
+                    <span class="section-tag">
+                        MY PROBLEMS
+                    </span>
+
+                    <h2>
+                        Your Submitted Problems
+                    </h2>
+
+                </div>
+
+
+                <button
+                    id="refreshProblemsButton"
+                    class="btn btn-secondary btn-small"
+                >
+                    Refresh
+                </button>
+
+            </div>
+
+
+            <div
+                id="myProblemsContainer"
+                class="problems-list"
+            >
+
+                <div class="loading-state">
+
+                    Loading your problems...
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- =====================================================
+         MAIN JAVASCRIPT
+    ====================================================== -->
+
+    <script
+        src="{{ url_for('static', filename='js/app.js') }}"
+    ></script>
+
+
+    <!-- =====================================================
+         DASHBOARD LOGIC
+    ====================================================== -->
+
+    <script>
+
+        // ====================================================
+        // GET LOGGED-IN USER
+        // ====================================================
+
+        const storedUser =
+            localStorage.getItem(
+                "crowdsolve_user"
+            );
+
+
+        if (!storedUser) {
+
+            window.location.href =
+                "/login";
+
+        }
+
+
+        let currentUser = null;
+
+
+        try {
+
+            currentUser =
+                JSON.parse(
+                    storedUser
+                );
+
+        }
+
+        catch (error) {
+
+            localStorage.removeItem(
+                "crowdsolve_user"
+            );
+
+            window.location.href =
+                "/login";
+
+        }
+
+
+        // ====================================================
+        // VERIFY USER ROLE
+        // ====================================================
+
+        if (
+            !currentUser ||
+            currentUser.role !== "problemer"
+        ) {
+
+            localStorage.removeItem(
+                "crowdsolve_user"
+            );
+
+            window.location.href =
+                "/login";
+
+        }
+
+
+        // ====================================================
+        // DISPLAY USERNAME
+        // ====================================================
+
+        document.getElementById(
+            "welcomeUser"
+        ).textContent =
+            "Hello, " +
+            (
+                currentUser.username ||
+                "User"
+            );
+
+
+        // ====================================================
+        // ELEMENTS
+        // ====================================================
+
+        const problemForm =
+            document.getElementById(
+                "problemForm"
+            );
+
+
+        const problemTitle =
+            document.getElementById(
+                "problemTitle"
+            );
+
+
+        const problemDescription =
+            document.getElementById(
+                "problemDescription"
+            );
+
+
+        const submitProblemButton =
+            document.getElementById(
+                "submitProblemButton"
+            );
+
+
+        const messageBox =
+            document.getElementById(
+                "messageBox"
+            );
+
+
+        const characterCount =
+            document.getElementById(
+                "characterCount"
+            );
+
+
+        const refreshProblemsButton =
+            document.getElementById(
+                "refreshProblemsButton"
+            );
+
+
+        const myProblemsContainer =
+            document.getElementById(
+                "myProblemsContainer"
+            );
+
+
+        // ====================================================
+        // CHARACTER COUNTER
+        // ====================================================
+
+        problemDescription.addEventListener(
+            "input",
+            function () {
+
+                const count =
+                    problemDescription.value.length;
+
+
+                characterCount.textContent =
+                    count +
+                    " characters";
+
+            }
+        );
+
+
+        // ====================================================
+        // SHOW MESSAGE
+        // ====================================================
+
+        function showMessage(
+            message,
+            type
+        ) {
+
+            messageBox.textContent =
+                message;
+
+            messageBox.className =
+                "message-box " + type;
+
+        }
+
+
+        // ====================================================
+        // RESET ML PIPELINE
+        // ====================================================
+
+        function resetPipeline() {
+
+            const steps = [
+
+                "stepInput",
+
+                "stepPreprocessing",
+
+                "stepTfidf",
+
+                "stepModel"
+
+            ];
+
+
+            steps.forEach(
+                function (stepId) {
+
+                    const step =
+                        document.getElementById(
+                            stepId
+                        );
+
+
+                    step.classList.remove(
+                        "processing",
+                        "completed"
+                    );
+
+
+                    step.querySelector(
+                        ".step-status"
+                    ).textContent =
+                        "Waiting";
+
+                }
+            );
+
+
+            document.getElementById(
+                "predictedCategory"
+            ).textContent =
+                "Processing...";
+
+
+            document.getElementById(
+                "confidenceValue"
+            ).textContent =
+                "—";
+
+
+            document.getElementById(
+                "confidenceProgress"
+            ).style.width =
+                "0%";
+
+        }
+
+
+        // ====================================================
+        // ANIMATE ML PIPELINE
+        // ====================================================
+
+        function runPipelineAnimation() {
+
+            const steps = [
+
+                "stepInput",
+
+                "stepPreprocessing",
+
+                "stepTfidf",
+
+                "stepModel"
+
+            ];
+
+
+            steps.forEach(
+                function (
+                    stepId,
+                    index
+                ) {
+
+                    setTimeout(
+                        function () {
+
+                            const step =
+                                document.getElementById(
+                                    stepId
+                                );
+
+
+                            step.classList.add(
+                                "processing"
+                            );
+
+
+                            step.querySelector(
+                                ".step-status"
+                            ).textContent =
+                                "Processing";
+
+
+                            setTimeout(
+                                function () {
+
+                                    step.classList.remove(
+                                        "processing"
+                                    );
+
+
+                                    step.classList.add(
+                                        "completed"
+                                    );
+
+
+                                    step.querySelector(
+                                        ".step-status"
+                                    ).textContent =
+                                        "Completed";
+
+                                },
+
+                                450
+
+                            );
+
+                        },
+
+                        index * 500
+
+                    );
+
+                }
+            );
+
+        }
+
+
+        // ====================================================
+        // UPDATE ML RESULT
+        // ====================================================
+
+        function showPrediction(
+            category,
+            confidence
+        ) {
+
+            const confidenceNumber =
+                Number(confidence);
+
+
+            const confidencePercentage =
+                confidenceNumber <= 1
+                    ? confidenceNumber * 100
+                    : confidenceNumber;
+
+
+            document.getElementById(
+                "predictedCategory"
+            ).textContent =
+                category ||
+                "Category predicted";
+
+
+            document.getElementById(
+                "confidenceValue"
+            ).textContent =
+                confidencePercentage.toFixed(2) +
+                "%";
+
+
+            document.getElementById(
+                "confidenceProgress"
+            ).style.width =
+                Math.min(
+                    Math.max(
+                        confidencePercentage,
+                        0
+                    ),
+                    100
+                ) +
+                "%";
+
+        }
+
+
+        // ====================================================
+        // SUBMIT PROBLEM
+        // ====================================================
+
+        problemForm.addEventListener(
+            "submit",
+            async function (
+                event
+            ) {
+
+                event.preventDefault();
+
+
+                const title =
+                    problemTitle.value.trim();
+
+
+                const description =
+                    problemDescription.value.trim();
+
+
+                if (
+                    !title ||
+                    !description
+                ) {
+
+                    showMessage(
+                        "Please enter both a title and problem description.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                resetPipeline();
+
+                runPipelineAnimation();
+
+
+                submitProblemButton.disabled =
+                    true;
+
+
+                submitProblemButton.textContent =
+                    "Classifying Problem...";
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "/api/problems",
+                            {
+
+                                method:
+                                    "POST",
+
+                                headers: {
+
+                                    "Content-Type":
+                                        "application/json"
+
+                                },
+
+                                body:
+                                    JSON.stringify({
+
+                                        title:
+                                            title,
+
+                                        description:
+                                            description,
+
+                                        user_id:
+                                            currentUser.id
+
+                                    })
+
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (
+                        response.ok &&
+                        data.success
+                    ) {
+
+                        /*
+                        ------------------------------------------------
+                        HANDLE DIFFERENT BACKEND RESPONSE STRUCTURES
+                        ------------------------------------------------
+                        */
+
+                        const problem =
+                            data.problem ||
+                            data;
+
+
+                        const category =
+                            problem.category ||
+                            data.category ||
+                            problem.predicted_category ||
+                            data.predicted_category ||
+                            "Predicted Category";
+
+
+                        const confidence =
+                            problem.confidence ??
+                            data.confidence ??
+                            problem.prediction_confidence ??
+                            data.prediction_confidence ??
+                            0;
+
+
+                        /*
+                        Wait for the ML animation to complete
+                        before showing the actual result.
+                        */
+
+                        setTimeout(
+                            function () {
+
+                                showPrediction(
+                                    category,
+                                    confidence
+                                );
+
+
+                                showMessage(
+                                    "Problem classified and posted successfully.",
+                                    "success"
+                                );
+
+
+                                submitProblemButton.textContent =
+                                    "Problem Posted";
+
+
+                                loadMyProblems();
+
+
+                                setTimeout(
+                                    function () {
+
+                                        problemForm.reset();
+
+
+                                        characterCount.textContent =
+                                            "0 characters";
+
+
+                                        submitProblemButton.disabled =
+                                            false;
+
+
+                                        submitProblemButton.textContent =
+                                            "Classify and Post Problem";
+
+                                    },
+
+                                    1200
+
+                                );
+
+                            },
+
+                            2200
+
+                        );
+
+                    }
+
+                    else {
+
+                        showMessage(
+
+                            data.message ||
+                            "Unable to submit the problem.",
+
+                            "error"
+
+                        );
+
+
+                        submitProblemButton.disabled =
+                            false;
+
+
+                        submitProblemButton.textContent =
+                            "Classify and Post Problem";
+
+                    }
+
+                }
+
+
+                catch (error) {
+
+                    console.error(
+                        "Problem submission error:",
+                        error
+                    );
+
+
+                    showMessage(
+
+                        "Unable to connect to the server.",
+
+                        "error"
+
+                    );
+
+
+                    submitProblemButton.disabled =
+                        false;
+
+
+                    submitProblemButton.textContent =
+                        "Classify and Post Problem";
+
+                }
+
+            }
+        );
+
+
+        // ====================================================
+        // LOAD USER'S PROBLEMS
+        // ====================================================
+
+        async function loadMyProblems() {
+
+            myProblemsContainer.innerHTML =
+                `
+                <div class="loading-state">
+                    Loading your problems...
+                </div>
+                `;
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/problems?user_id=" +
+                        currentUser.id
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    response.ok &&
+                    data.success
+                ) {
+
+                    const problems =
+                        data.problems ||
+                        [];
+
+
+                    displayMyProblems(
+                        problems
+                    );
+
+                }
+
+                else {
+
+                    myProblemsContainer.innerHTML =
+                        `
+                        <div class="empty-state">
+                            Unable to load your problems.
+                        </div>
+                        `;
+
+                }
+
+            }
+
+
+            catch (error) {
+
+                console.error(
+                    "Load problems error:",
+                    error
+                );
+
+
+                myProblemsContainer.innerHTML =
+                    `
+                    <div class="empty-state">
+                        Unable to connect to the server.
+                    </div>
+                    `;
+
+            }
+
+        }
+
+
+        // ====================================================
+        // DISPLAY USER'S PROBLEMS
+        // ====================================================
+
+        function displayMyProblems(
+            problems
+        ) {
+
+            if (
+                !problems ||
+                problems.length === 0
+            ) {
+
+                myProblemsContainer.innerHTML =
+                    `
+                    <div class="empty-state">
+
+                        <h3>
+                            No Problems Yet
+                        </h3>
+
+                        <p>
+                            Submit your first problem and the
+                            Machine Learning model will classify it.
+
+                        </p>
+
+                    </div>
+                    `;
+
+                return;
+
+            }
+
+
+            myProblemsContainer.innerHTML =
+                problems.map(
+                    function (
+                        problem
+                    ) {
+
+                        const category =
+                            problem.category ||
+                            problem.predicted_category ||
+                            "Unclassified";
+
+
+                        const confidence =
+                            problem.confidence ??
+                            problem.prediction_confidence;
+
+
+                        const confidenceText =
+                            confidence !== undefined &&
+                            confidence !== null
+                                ? (
+                                    Number(
+                                        confidence
+                                    ) <= 1
+                                        ? (
+                                            Number(
+                                                confidence
+                                            ) * 100
+                                        ).toFixed(2)
+                                        : Number(
+                                            confidence
+                                        ).toFixed(2)
+                                ) +
+                                "%"
+                                : "N/A";
+
+
+                        const solutionCount =
+                            problem.solution_count ??
+                            problem.solutions_count ??
+                            0;
+
+
+                        return `
+
+                            <article
+                                class="problem-item"
+                            >
+
+                                <div
+                                    class="problem-item-header"
+                                >
+
+                                    <div>
+
+                                        <span
+                                            class="category-badge"
+                                        >
+
+                                            ${escapeHtml(
+                                                category
+                                            )}
+
+                                        </span>
+
+
+                                        <h3>
+
+                                            ${escapeHtml(
+                                                problem.title
+                                            )}
+
+                                        </h3>
+
+                                    </div>
+
+
+                                    <span
+                                        class="confidence-badge"
+                                    >
+
+                                        ${confidenceText}
+                                        confidence
+
+                                    </span>
+
+                                </div>
+
+
+                                <p
+                                    class="problem-description"
+                                >
+
+                                    ${escapeHtml(
+                                        problem.description
+                                    )}
+
+                                </p>
+
+
+                                <div
+                                    class="problem-meta"
+                                >
+
+                                    <span>
+
+                                        Solutions:
+                                        <strong>
+
+                                            ${solutionCount}
+
+                                        </strong>
+
+                                    </span>
+
+
+                                    <span>
+
+                                        ID:
+                                        ${problem.id}
+
+                                    </span>
+
+                                </div>
+
+                            </article>
+
+                        `;
+
+                    }
+                ).join("");
+
+        }
+
+
+        // ====================================================
+        // ESCAPE HTML
+        // ====================================================
+
+        function escapeHtml(
+            value
+        ) {
+
+            if (
+                value === null ||
+                value === undefined
+            ) {
+
+                return "";
+
+            }
+
+
+            return String(value)
+
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
+
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
+
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
+
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
+
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
+
+        }
+
+
+        // ====================================================
+        // REFRESH PROBLEMS
+        // ====================================================
+
+        refreshProblemsButton.addEventListener(
+            "click",
+            loadMyProblems
+        );
+
+
+        // ====================================================
+        // LOGOUT
+        // ====================================================
+
+        document.getElementById(
+            "logoutButton"
+        ).addEventListener(
+            "click",
+            function () {
+
+                localStorage.removeItem(
+                    "crowdsolve_user"
+                );
+
+
+                window.location.href =
+                    "/";
+
+            }
+        );
+
+
+        // ====================================================
+        // INITIAL LOAD
+        // ====================================================
+
+        loadMyProblems();
+
+    </script>
+
+</body>
+
+</html>

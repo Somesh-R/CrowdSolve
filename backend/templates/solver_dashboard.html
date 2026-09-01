@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Solver Dashboard | CrowdSolve</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+
+<body class="dashboard-body">
+
+
+    <!-- =====================================================
+         NAVIGATION
+    ====================================================== -->
+
+    <nav class="dashboard-navbar">
+
+        <a href="/" class="logo">
+            Crowd<span>Solve</span>
+        </a>
+
+
+        <div class="dashboard-nav-right">
+
+            <span
+                id="welcomeUser"
+                class="welcome-user"
+            >
+                Loading...
+            </span>
+
+
+            <span class="role-badge">
+                SOLVER
+            </span>
+
+
+            <button
+                id="logoutButton"
+                class="btn btn-secondary btn-small"
+            >
+                Logout
+            </button>
+
+        </div>
+
+    </nav>
+
+
+    <!-- =====================================================
+         MAIN DASHBOARD
+    ====================================================== -->
+
+    <main class="dashboard-container">
+
+
+        <!-- =================================================
+             DASHBOARD HEADER
+        ================================================== -->
+
+        <section class="dashboard-header">
+
+            <div>
+
+                <span class="section-tag">
+                    SOLVER DASHBOARD
+                </span>
+
+                <h1>
+                    Common Problem Pool
+                </h1>
+
+                <p>
+                    Browse problems submitted to CrowdSolve,
+                    view their Machine Learning classification,
+                    and choose problems you want to solve.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             FILTER SECTION
+        ================================================== -->
+
+        <section class="dashboard-card filter-card">
+
+            <div class="filter-header">
+
+                <div>
+
+                    <h2>
+                        Find Problems
+                    </h2>
+
+                    <p>
+                        Filter problems by their predicted
+                        Machine Learning category.
+                    </p>
+
+                </div>
+
+
+                <button
+                    id="refreshProblemsButton"
+                    class="btn btn-secondary btn-small"
+                >
+                    Refresh
+                </button>
+
+            </div>
+
+
+            <div class="filter-controls">
+
+                <div class="form-group">
+
+                    <label for="categoryFilter">
+                        Problem Category
+                    </label>
+
+                    <select id="categoryFilter">
+
+                        <option value="">
+                            All Categories
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="searchInput">
+                        Search Problems
+                    </label>
+
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Search by title or description..."
+                    >
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             MAIN CONTENT GRID
+        ================================================== -->
+
+        <div class="solver-grid">
+
+
+            <!-- =============================================
+                 PROBLEM POOL
+            ============================================== -->
+
+            <section class="problem-pool-section">
+
+
+                <div class="section-title-row">
+
+                    <div>
+
+                        <span class="section-tag">
+                            AVAILABLE PROBLEMS
+                        </span>
+
+                        <h2>
+                            Problem Pool
+                        </h2>
+
+                    </div>
+
+
+                    <span
+                        id="problemCount"
+                        class="problem-count"
+                    >
+                        0 problems
+                    </span>
+
+                </div>
+
+
+                <div
+                    id="solverMessageBox"
+                    class="message-box hidden"
+                ></div>
+
+
+                <div
+                    id="problemsContainer"
+                    class="solver-problems-list"
+                >
+
+                    <div class="loading-state">
+
+                        Loading available problems...
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =============================================
+                 SELECTED PROBLEM / SOLUTION PANEL
+            ============================================== -->
+
+            <aside class="solution-panel">
+
+
+                <div class="dashboard-card selected-problem-card">
+
+
+                    <span class="section-tag">
+                        SELECTED PROBLEM
+                    </span>
+
+
+                    <div
+                        id="selectedProblemInfo"
+                        class="selected-problem-empty"
+                    >
+
+                        <h3>
+                            No Problem Selected
+                        </h3>
+
+                        <p>
+                            Select a problem from the common
+                            problem pool to view its details
+                            and submit your solution.
+                        </p>
+
+                    </div>
+
+
+                    <!-- =====================================
+                         SELECTED PROBLEM DETAILS
+                    ====================================== -->
+
+                    <div
+                        id="selectedProblemDetails"
+                        class="hidden"
+                    >
+
+                        <div class="selected-category-row">
+
+                            <span
+                                id="selectedCategory"
+                                class="category-badge"
+                            >
+                                Category
+                            </span>
+
+
+                            <span
+                                id="selectedConfidence"
+                                class="confidence-badge"
+                            >
+                                Confidence
+                            </span>
+
+                        </div>
+
+
+                        <h2
+                            id="selectedProblemTitle"
+                        >
+                        </h2>
+
+
+                        <p
+                            id="selectedProblemDescription"
+                            class="selected-problem-description"
+                        >
+                        </p>
+
+
+                        <div class="ml-classification-summary">
+
+                            <strong>
+                                ML Classification
+                            </strong>
+
+                            <div class="ml-summary-row">
+
+                                <span>
+                                    TF-IDF Features
+                                </span>
+
+                                <span>
+                                    →
+                                </span>
+
+                                <span>
+                                    Logistic Regression
+                                </span>
+
+                                <span>
+                                    →
+                                </span>
+
+                                <strong
+                                    id="mlPredictedCategory"
+                                >
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- =================================
+                             SOLUTION FORM
+                        ================================== -->
+
+                        <form
+                            id="solutionForm"
+                            class="solution-form"
+                        >
+
+                            <div class="form-group">
+
+                                <label for="solutionText">
+                                    Your Solution
+                                </label>
+
+                                <textarea
+                                    id="solutionText"
+                                    placeholder="Write your detailed solution, approach, explanation, or recommendation..."
+                                    rows="12"
+                                    required
+                                ></textarea>
+
+                                <div class="input-info">
+
+                                    <span>
+                                        Provide a clear and detailed
+                                        solution.
+                                    </span>
+
+                                    <span
+                                        id="solutionCharacterCount"
+                                    >
+                                        0 characters
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <button
+                                type="submit"
+                                id="submitSolutionButton"
+                                class="btn btn-primary submit-solution-button"
+                            >
+                                Submit Solution
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =============================================
+                     SOLVER WORKFLOW INFORMATION
+                ============================================== -->
+
+                <div class="dashboard-card solver-info-card">
+
+                    <h3>
+                        How It Works
+                    </h3>
+
+
+                    <div class="solver-workflow-item">
+
+                        <span class="solver-workflow-number">
+                            1
+                        </span>
+
+                        <p>
+                            Browse problems classified by the
+                            Machine Learning model.
+                        </p>
+
+                    </div>
+
+
+                    <div class="solver-workflow-item">
+
+                        <span class="solver-workflow-number">
+                            2
+                        </span>
+
+                        <p>
+                            Select a problem related to your
+                            expertise.
+                        </p>
+
+                    </div>
+
+
+                    <div class="solver-workflow-item">
+
+                        <span class="solver-workflow-number">
+                            3
+                        </span>
+
+                        <p>
+                            Submit your solution. Multiple solvers
+                            can provide different solutions.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </aside>
+
+        </div>
+
+    </main>
+
+
+    <!-- =====================================================
+         MAIN JAVASCRIPT
+    ====================================================== -->
+
+    <script
+        src="{{ url_for('static', filename='js/app.js') }}"
+    ></script>
+
+
+    <!-- =====================================================
+         SOLVER DASHBOARD LOGIC
+    ====================================================== -->
+
+    <script>
+
+        // ====================================================
+        // USER AUTHENTICATION
+        // ====================================================
+
+        const storedUser =
+            localStorage.getItem(
+                "crowdsolve_user"
+            );
+
+
+        if (!storedUser) {
+
+            window.location.href =
+                "/login";
+
+        }
+
+
+        let currentUser = null;
+
+
+        try {
+
+            currentUser =
+                JSON.parse(
+                    storedUser
+                );
+
+        }
+
+        catch (error) {
+
+            localStorage.removeItem(
+                "crowdsolve_user"
+            );
+
+            window.location.href =
+                "/login";
+
+        }
+
+
+        // ====================================================
+        // VERIFY SOLVER ROLE
+        // ====================================================
+
+        if (
+            !currentUser ||
+            currentUser.role !== "solver"
+        ) {
+
+            localStorage.removeItem(
+                "crowdsolve_user"
+            );
+
+            window.location.href =
+                "/login";
+
+        }
+
+
+        // ====================================================
+        // DISPLAY USERNAME
+        // ====================================================
+
+        document.getElementById(
+            "welcomeUser"
+        ).textContent =
+            "Hello, " +
+            (
+                currentUser.username ||
+                "Solver"
+            );
+
+
+        // ====================================================
+        // GLOBAL VARIABLES
+        // ====================================================
+
+        let allProblems = [];
+
+        let selectedProblem = null;
+
+
+        // ====================================================
+        // DOM ELEMENTS
+        // ====================================================
+
+        const problemsContainer =
+            document.getElementById(
+                "problemsContainer"
+            );
+
+
+        const categoryFilter =
+            document.getElementById(
+                "categoryFilter"
+            );
+
+
+        const searchInput =
+            document.getElementById(
+                "searchInput"
+            );
+
+
+        const problemCount =
+            document.getElementById(
+                "problemCount"
+            );
+
+
+        const selectedProblemInfo =
+            document.getElementById(
+                "selectedProblemInfo"
+            );
+
+
+        const selectedProblemDetails =
+            document.getElementById(
+                "selectedProblemDetails"
+            );
+
+
+        const solutionForm =
+            document.getElementById(
+                "solutionForm"
+            );
+
+
+        const solutionText =
+            document.getElementById(
+                "solutionText"
+            );
+
+
+        const submitSolutionButton =
+            document.getElementById(
+                "submitSolutionButton"
+            );
+
+
+        const solutionCharacterCount =
+            document.getElementById(
+                "solutionCharacterCount"
+            );
+
+
+        const solverMessageBox =
+            document.getElementById(
+                "solverMessageBox"
+            );
+
+
+        // ====================================================
+        // SHOW MESSAGE
+        // ====================================================
+
+        function showMessage(
+            message,
+            type
+        ) {
+
+            solverMessageBox.textContent =
+                message;
+
+
+            solverMessageBox.className =
+                "message-box " + type;
+
+
+            setTimeout(
+                function () {
+
+                    solverMessageBox.className =
+                        "message-box hidden";
+
+                },
+
+                5000
+
+            );
+
+        }
+
+
+        // ====================================================
+        // LOAD ALL PROBLEMS
+        // ====================================================
+
+        async function loadProblems() {
+
+            problemsContainer.innerHTML =
+                `
+                <div class="loading-state">
+                    Loading available problems...
+                </div>
+                `;
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/problems"
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    response.ok &&
+                    data.success
+                ) {
+
+                    allProblems =
+                        data.problems ||
+                        [];
+
+
+                    populateCategories();
+
+                    filterProblems();
+
+                }
+
+                else {
+
+                    problemsContainer.innerHTML =
+                        `
+                        <div class="empty-state">
+
+                            <h3>
+                                Unable to Load Problems
+                            </h3>
+
+                            <p>
+                                ${escapeHtml(
+                                    data.message ||
+                                    "The server could not retrieve the problem pool."
+                                )}
+                            </p>
+
+                        </div>
+                        `;
+
+                }
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Load problems error:",
+                    error
+                );
+
+
+                problemsContainer.innerHTML =
+                    `
+                    <div class="empty-state">
+
+                        <h3>
+                            Connection Error
+                        </h3>
+
+                        <p>
+                            Unable to connect to the CrowdSolve backend.
+                        </p>
+
+                    </div>
+                    `;
+
+            }
+
+        }
+
+
+        // ====================================================
+        // POPULATE CATEGORY FILTER
+        // ====================================================
+
+        function populateCategories() {
+
+            const currentValue =
+                categoryFilter.value;
+
+
+            const categories =
+                [
+                    ...new Set(
+
+                        allProblems
+
+                            .map(
+                                function (problem) {
+
+                                    return (
+                                        problem.category ||
+                                        problem.predicted_category ||
+                                        ""
+                                    );
+
+                                }
+                            )
+
+                            .filter(
+                                Boolean
+                            )
+
+                    )
+
+                ].sort();
+
+
+            categoryFilter.innerHTML =
+                `
+                <option value="">
+                    All Categories
+                </option>
+                `;
+
+
+            categories.forEach(
+                function (category) {
+
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+
+                    option.value =
+                        category;
+
+
+                    option.textContent =
+                        category;
+
+
+                    categoryFilter.appendChild(
+                        option
+                    );
+
+                }
+            );
+
+
+            if (
+                categories.includes(
+                    currentValue
+                )
+            ) {
+
+                categoryFilter.value =
+                    currentValue;
+
+            }
+
+        }
+
+
+        // ====================================================
+        // FILTER PROBLEMS
+        // ====================================================
+
+        function filterProblems() {
+
+            const selectedCategory =
+                categoryFilter.value
+                    .toLowerCase();
+
+
+            const searchTerm =
+                searchInput.value
+                    .trim()
+                    .toLowerCase();
+
+
+            const filteredProblems =
+                allProblems.filter(
+                    function (problem) {
+
+                        const category =
+                            (
+                                problem.category ||
+                                problem.predicted_category ||
+                                ""
+                            )
+                            .toLowerCase();
+
+
+                        const title =
+                            (
+                                problem.title ||
+                                ""
+                            )
+                            .toLowerCase();
+
+
+                        const description =
+                            (
+                                problem.description ||
+                                ""
+                            )
+                            .toLowerCase();
+
+
+                        const categoryMatches =
+                            !selectedCategory ||
+                            category ===
+                            selectedCategory;
+
+
+                        const searchMatches =
+                            !searchTerm ||
+                            title.includes(
+                                searchTerm
+                            ) ||
+                            description.includes(
+                                searchTerm
+                            );
+
+
+                        return (
+                            categoryMatches &&
+                            searchMatches
+                        );
+
+                    }
+                );
+
+
+            displayProblems(
+                filteredProblems
+            );
+
+        }
+
+
+        // ====================================================
+        // DISPLAY PROBLEMS
+        // ====================================================
+
+        function displayProblems(
+            problems
+        ) {
+
+            problemCount.textContent =
+                problems.length +
+                (
+                    problems.length === 1
+                        ? " problem"
+                        : " problems"
+                );
+
+
+            if (
+                problems.length === 0
+            ) {
+
+                problemsContainer.innerHTML =
+                    `
+                    <div class="empty-state">
+
+                        <h3>
+                            No Problems Found
+                        </h3>
+
+                        <p>
+                            There are currently no problems matching
+                            your search criteria.
+                        </p>
+
+                    </div>
+                    `;
+
+                return;
+
+            }
+
+
+            problemsContainer.innerHTML =
+                problems.map(
+                    function (
+                        problem
+                    ) {
+
+                        const category =
+                            problem.category ||
+                            problem.predicted_category ||
+                            "Unclassified";
+
+
+                        const confidence =
+                            problem.confidence ??
+                            problem.prediction_confidence;
+
+
+                        let confidenceText =
+                            "N/A";
+
+
+                        if (
+                            confidence !== null &&
+                            confidence !== undefined
+                        ) {
+
+                            const number =
+                                Number(
+                                    confidence
+                                );
+
+
+                            confidenceText =
+                                (
+                                    number <= 1
+                                        ? number * 100
+                                        : number
+                                )
+                                .toFixed(2) +
+                                "%";
+
+                        }
+
+
+                        const selectedClass =
+                            selectedProblem &&
+                            selectedProblem.id ===
+                            problem.id
+                                ? " selected"
+                                : "";
+
+
+                        return `
+
+                            <article
+                                class="solver-problem-card${selectedClass}"
+                                data-problem-id="${problem.id}"
+                            >
+
+                                <div
+                                    class="solver-problem-header"
+                                >
+
+                                    <span
+                                        class="category-badge"
+                                    >
+                                        ${escapeHtml(
+                                            category
+                                        )}
+                                    </span>
+
+
+                                    <span
+                                        class="confidence-badge"
+                                    >
+                                        ${confidenceText}
+                                        confidence
+                                    </span>
+
+                                </div>
+
+
+                                <h3>
+                                    ${escapeHtml(
+                                        problem.title
+                                    )}
+                                </h3>
+
+
+                                <p>
+
+                                    ${escapeHtml(
+                                        truncateText(
+                                            problem.description,
+                                            220
+                                        )
+                                    )}
+
+                                </p>
+
+
+                                <div
+                                    class="solver-problem-footer"
+                                >
+
+                                    <span>
+
+                                        Problem ID:
+                                        ${problem.id}
+
+                                    </span>
+
+
+                                    <button
+                                        class="btn btn-primary btn-small select-problem-button"
+                                        data-problem-id="${problem.id}"
+                                    >
+                                        Solve This Problem
+                                    </button>
+
+                                </div>
+
+                            </article>
+
+                        `;
+
+                    }
+                ).join("");
+
+
+            document.querySelectorAll(
+                ".select-problem-button"
+            ).forEach(
+                function (
+                    button
+                ) {
+
+                    button.addEventListener(
+                        "click",
+                        function () {
+
+                            const problemId =
+                                Number(
+                                    button.dataset
+                                        .problemId
+                                );
+
+
+                            selectProblem(
+                                problemId
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+        }
+
+
+        // ====================================================
+        // SELECT A PROBLEM
+        // ====================================================
+
+        function selectProblem(
+            problemId
+        ) {
+
+            selectedProblem =
+                allProblems.find(
+                    function (
+                        problem
+                    ) {
+
+                        return (
+                            Number(
+                                problem.id
+                            ) ===
+                            Number(
+                                problemId
+                            )
+                        );
+
+                    }
+                );
+
+
+            if (!selectedProblem) {
+
+                return;
+
+            }
+
+
+            const category =
+                selectedProblem.category ||
+                selectedProblem.predicted_category ||
+                "Unclassified";
+
+
+            const confidence =
+                selectedProblem.confidence ??
+                selectedProblem.prediction_confidence;
+
+
+            let confidenceText =
+                "Confidence unavailable";
+
+
+            if (
+                confidence !== null &&
+                confidence !== undefined
+            ) {
+
+                const number =
+                    Number(
+                        confidence
+                    );
+
+
+                confidenceText =
+                    (
+                        number <= 1
+                            ? number * 100
+                            : number
+                    )
+                    .toFixed(2) +
+                    "% confidence";
+
+            }
+
+
+            selectedProblemInfo.classList.add(
+                "hidden"
+            );
+
+
+            selectedProblemDetails.classList.remove(
+                "hidden"
+            );
+
+
+            document.getElementById(
+                "selectedCategory"
+            ).textContent =
+                category;
+
+
+            document.getElementById(
+                "selectedConfidence"
+            ).textContent =
+                confidenceText;
+
+
+            document.getElementById(
+                "selectedProblemTitle"
+            ).textContent =
+                selectedProblem.title ||
+                "Untitled Problem";
+
+
+            document.getElementById(
+                "selectedProblemDescription"
+            ).textContent =
+                selectedProblem.description ||
+                "";
+
+
+            document.getElementById(
+                "mlPredictedCategory"
+            ).textContent =
+                category;
+
+
+            solutionText.value =
+                "";
+
+
+            solutionCharacterCount.textContent =
+                "0 characters";
+
+
+            displayProblems(
+                getCurrentlyFilteredProblems()
+            );
+
+
+            window.scrollTo({
+
+                top: 0,
+
+                behavior: "smooth"
+
+            });
+
+        }
+
+
+        // ====================================================
+        // GET CURRENTLY FILTERED PROBLEMS
+        // ====================================================
+
+        function getCurrentlyFilteredProblems() {
+
+            const selectedCategory =
+                categoryFilter.value
+                    .toLowerCase();
+
+
+            const searchTerm =
+                searchInput.value
+                    .trim()
+                    .toLowerCase();
+
+
+            return allProblems.filter(
+                function (
+                    problem
+                ) {
+
+                    const category =
+                        (
+                            problem.category ||
+                            problem.predicted_category ||
+                            ""
+                        )
+                        .toLowerCase();
+
+
+                    const title =
+                        (
+                            problem.title ||
+                            ""
+                        )
+                        .toLowerCase();
+
+
+                    const description =
+                        (
+                            problem.description ||
+                            ""
+                        )
+                        .toLowerCase();
+
+
+                    return (
+
+                        (
+                            !selectedCategory ||
+                            category ===
+                            selectedCategory
+                        )
+
+                        &&
+
+                        (
+                            !searchTerm ||
+
+                            title.includes(
+                                searchTerm
+                            )
+
+                            ||
+
+                            description.includes(
+                                searchTerm
+                            )
+                        )
+
+                    );
+
+                }
+            );
+
+        }
+
+
+        // ====================================================
+        // SOLUTION CHARACTER COUNTER
+        // ====================================================
+
+        solutionText.addEventListener(
+            "input",
+            function () {
+
+                solutionCharacterCount.textContent =
+                    solutionText.value.length +
+                    " characters";
+
+            }
+        );
+
+
+        // ====================================================
+        // SUBMIT SOLUTION
+        // ====================================================
+
+        solutionForm.addEventListener(
+            "submit",
+            async function (
+                event
+            ) {
+
+                event.preventDefault();
+
+
+                if (
+                    !selectedProblem
+                ) {
+
+                    showMessage(
+                        "Please select a problem first.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                const solution =
+                    solutionText.value.trim();
+
+
+                if (!solution) {
+
+                    showMessage(
+                        "Please enter your solution.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                submitSolutionButton.disabled =
+                    true;
+
+
+                submitSolutionButton.textContent =
+                    "Submitting Solution...";
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "/api/solutions",
+                            {
+
+                                method:
+                                    "POST",
+
+                                headers: {
+
+                                    "Content-Type":
+                                        "application/json"
+
+                                },
+
+                                body:
+                                    JSON.stringify({
+
+                                        problem_id:
+                                            selectedProblem.id,
+
+                                        user_id:
+                                            currentUser.id,
+
+                                        solution:
+                                            solution
+
+                                    })
+
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (
+                        response.ok &&
+                        data.success
+                    ) {
+
+                        showMessage(
+                            "Solution submitted successfully.",
+                            "success"
+                        );
+
+
+                        solutionForm.reset();
+
+
+                        solutionCharacterCount.textContent =
+                            "0 characters";
+
+
+                        submitSolutionButton.textContent =
+                            "Solution Submitted";
+
+
+                        setTimeout(
+                            function () {
+
+                                submitSolutionButton.disabled =
+                                    false;
+
+
+                                submitSolutionButton.textContent =
+                                    "Submit Solution";
+
+                            },
+
+                            1000
+
+                        );
+
+                    }
+
+                    else {
+
+                        showMessage(
+
+                            data.message ||
+                            "Unable to submit your solution.",
+
+                            "error"
+
+                        );
+
+
+                        submitSolutionButton.disabled =
+                            false;
+
+
+                        submitSolutionButton.textContent =
+                            "Submit Solution";
+
+                    }
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "Solution submission error:",
+                        error
+                    );
+
+
+                    showMessage(
+
+                        "Unable to connect to the server.",
+
+                        "error"
+
+                    );
+
+
+                    submitSolutionButton.disabled =
+                        false;
+
+
+                    submitSolutionButton.textContent =
+                        "Submit Solution";
+
+                }
+
+            }
+        );
+
+
+        // ====================================================
+        // FILTER EVENTS
+        // ====================================================
+
+        categoryFilter.addEventListener(
+            "change",
+            filterProblems
+        );
+
+
+        searchInput.addEventListener(
+            "input",
+            filterProblems
+        );
+
+
+        document.getElementById(
+            "refreshProblemsButton"
+        ).addEventListener(
+            "click",
+            loadProblems
+        );
+
+
+        // ====================================================
+        // LOGOUT
+        // ====================================================
+
+        document.getElementById(
+            "logoutButton"
+        ).addEventListener(
+            "click",
+            function () {
+
+                localStorage.removeItem(
+                    "crowdsolve_user"
+                );
+
+
+                window.location.href =
+                    "/";
+
+            }
+        );
+
+
+        // ====================================================
+        // HELPER: TRUNCATE TEXT
+        // ====================================================
+
+        function truncateText(
+            text,
+            maxLength
+        ) {
+
+            if (!text) {
+
+                return "";
+
+            }
+
+
+            if (
+                text.length <=
+                maxLength
+            ) {
+
+                return text;
+
+            }
+
+
+            return (
+                text.substring(
+                    0,
+                    maxLength
+                ) +
+                "..."
+            );
+
+        }
+
+
+        // ====================================================
+        // HELPER: ESCAPE HTML
+        // ====================================================
+
+        function escapeHtml(
+            value
+        ) {
+
+            if (
+                value === null ||
+                value === undefined
+            ) {
+
+                return "";
+
+            }
+
+
+            return String(value)
+
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
+
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
+
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
+
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
+
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
+
+        }
+
+
+        // ====================================================
+        // INITIAL LOAD
+        // ====================================================
+
+        loadProblems();
+
+    </script>
+
+</body>
+
+</html>

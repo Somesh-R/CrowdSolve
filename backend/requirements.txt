@@ -1,0 +1,9 @@
+Flask
+Flask-SQLAlchemy
+Flask-SocketIO
+psycopg[binary]
+python-dotenv
+eventlet
+scikit-learn
+joblib
+nltk
