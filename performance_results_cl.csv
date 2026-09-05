@@ -1,7 +1,0 @@
-Metric,Value
-Accuracy,0.9837467921300257
-Precision (Macro),0.9876485484957935
-Recall (Macro),0.9830226683487553
-F1 Score (Macro),0.9851873780348244
-Training Time (seconds),0.5976059436798096
-Prediction Time (seconds),0.001009225845336914

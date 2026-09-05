@@ -15,6 +15,75 @@
         rel="stylesheet"
         href="{{ url_for('static', filename='css/style.css') }}"
     >
+
+    <style>
+        /* =========================================================
+           ASSIGNED DOMAIN DISPLAY
+        ========================================================== */
+
+        .assigned-domains-section {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(148, 163, 184, 0.20);
+        }
+
+        .assigned-domains-title {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #e5e7eb;
+        }
+
+        .classification-mode {
+            display: inline-block;
+            margin-bottom: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #60a5fa;
+        }
+
+        .assigned-domains-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .assigned-domain-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: rgba(30, 64, 175, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            font-size: 13px;
+        }
+
+        .assigned-domain-name {
+            font-weight: 700;
+            color: #e5e7eb;
+        }
+
+        .assigned-domain-confidence {
+            color: #60a5fa;
+            font-weight: 600;
+        }
+
+        .selected-domains-section {
+            margin-top: 18px;
+            padding: 14px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(148, 163, 184, 0.15);
+        }
+
+        .selected-domains-section .assigned-domains-section {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: 0;
+        }
+    </style>
 </head>
 
 
@@ -31,7 +100,6 @@
             Crowd<span>Solve</span>
         </a>
 
-
         <div class="dashboard-nav-right">
 
             <span
@@ -41,11 +109,9 @@
                 Loading...
             </span>
 
-
             <span class="role-badge">
                 SOLVER
             </span>
-
 
             <button
                 id="logoutButton"
@@ -108,12 +174,11 @@
                     </h2>
 
                     <p>
-                        Filter problems by their predicted
-                        Machine Learning category.
+                        Filter problems by any domain assigned
+                        by the Machine Learning model.
                     </p>
 
                 </div>
-
 
                 <button
                     id="refreshProblemsButton"
@@ -176,7 +241,6 @@
 
             <section class="problem-pool-section">
 
-
                 <div class="section-title-row">
 
                     <div>
@@ -190,7 +254,6 @@
                         </h2>
 
                     </div>
-
 
                     <span
                         id="problemCount"
@@ -214,9 +277,7 @@
                 >
 
                     <div class="loading-state">
-
                         Loading available problems...
-
                     </div>
 
                 </div>
@@ -233,11 +294,12 @@
 
                 <div class="dashboard-card selected-problem-card">
 
-
                     <span class="section-tag">
                         SELECTED PROBLEM
                     </span>
 
+
+                    <!-- EMPTY STATE -->
 
                     <div
                         id="selectedProblemInfo"
@@ -257,9 +319,7 @@
                     </div>
 
 
-                    <!-- =====================================
-                         SELECTED PROBLEM DETAILS
-                    ====================================== -->
+                    <!-- SELECTED PROBLEM DETAILS -->
 
                     <div
                         id="selectedProblemDetails"
@@ -275,7 +335,6 @@
                                 Category
                             </span>
 
-
                             <span
                                 id="selectedConfidence"
                                 class="confidence-badge"
@@ -286,9 +345,7 @@
                         </div>
 
 
-                        <h2
-                            id="selectedProblemTitle"
-                        >
+                        <h2 id="selectedProblemTitle">
                         </h2>
 
 
@@ -298,6 +355,35 @@
                         >
                         </p>
 
+
+                        <!-- =================================
+                             ASSIGNED DOMAINS
+                        ================================== -->
+
+                        <div class="selected-domains-section">
+
+                            <span class="assigned-domains-title">
+                                Assigned Domain(s)
+                            </span>
+
+                            <span
+                                id="selectedClassificationMode"
+                                class="classification-mode"
+                            >
+                            </span>
+
+                            <div
+                                id="selectedDomains"
+                                class="assigned-domains-list"
+                            >
+                            </div>
+
+                        </div>
+
+
+                        <!-- =================================
+                             ML CLASSIFICATION SUMMARY
+                        ================================== -->
 
                         <div class="ml-classification-summary">
 
@@ -463,6 +549,7 @@
     ====================================================== -->
 
     <script>
+
 
         // ====================================================
         // USER AUTHENTICATION
@@ -630,10 +717,8 @@
             solverMessageBox.textContent =
                 message;
 
-
             solverMessageBox.className =
                 "message-box " + type;
-
 
             setTimeout(
                 function () {
@@ -642,10 +727,466 @@
                         "message-box hidden";
 
                 },
-
                 5000
-
             );
+
+        }
+
+
+        // ====================================================
+        // NORMALIZE CONFIDENCE
+        // ====================================================
+
+        function normalizeConfidence(
+            value
+        ) {
+
+            if (
+                value === null ||
+                value === undefined ||
+                value === ""
+            ) {
+
+                return null;
+
+            }
+
+
+            const number =
+                Number(value);
+
+
+            if (Number.isNaN(number)) {
+
+                return null;
+
+            }
+
+
+            return number <= 1
+                ? number * 100
+                : number;
+
+        }
+
+
+        // ====================================================
+        // NORMALIZE DOMAIN NAME
+        // ====================================================
+
+        function normalizeDomainName(
+            value
+        ) {
+
+            if (
+                value === null ||
+                value === undefined
+            ) {
+
+                return "";
+
+            }
+
+
+            return String(value)
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, " ");
+
+        }
+
+
+        // ====================================================
+        // GET PRIMARY CATEGORY
+        // ====================================================
+
+        function getPrimaryCategory(
+            problem
+        ) {
+
+            return (
+                problem.category ||
+                problem.predicted_category ||
+                "Unclassified"
+            );
+
+        }
+
+
+        // ====================================================
+        // GET PRIMARY CONFIDENCE
+        // ====================================================
+
+        function getPrimaryConfidence(
+            problem
+        ) {
+
+            return (
+                problem.confidence ??
+                problem.prediction_confidence ??
+                null
+            );
+
+        }
+
+
+        // ====================================================
+        // GET ASSIGNED DOMAINS
+        //
+        // Supports:
+        // 1. Array
+        // 2. JSON string
+        // 3. Object/dictionary
+        // 4. Alternate backend field names
+        // ====================================================
+
+        function getAssignedDomains(
+            problem
+        ) {
+
+            let raw =
+                problem.predicted_domains ??
+                problem.assigned_domains ??
+                problem.predictedDomains ??
+                problem.assignedDomains ??
+                [];
+
+
+            // -----------------------------------------------
+            // JSON string
+            // -----------------------------------------------
+
+            if (typeof raw === "string") {
+
+                try {
+
+                    raw =
+                        JSON.parse(raw);
+
+                }
+
+                catch (error) {
+
+                    // If it is simply a category string,
+                    // convert it into one domain.
+
+                    if (raw.trim()) {
+
+                        raw = [
+                            {
+                                category:
+                                    raw.trim(),
+
+                                confidence:
+                                    getPrimaryConfidence(
+                                        problem
+                                    )
+                            }
+                        ];
+
+                    }
+
+                    else {
+
+                        raw = [];
+
+                    }
+
+                }
+
+            }
+
+
+            // -----------------------------------------------
+            // Object / dictionary
+            // -----------------------------------------------
+
+            if (
+                raw &&
+                !Array.isArray(raw) &&
+                typeof raw === "object"
+            ) {
+
+                raw =
+                    Object.entries(raw)
+                        .map(
+                            function (
+                                entry
+                            ) {
+
+                                return {
+                                    category:
+                                        entry[0],
+
+                                    confidence:
+                                        entry[1]
+                                };
+
+                            }
+                        );
+
+            }
+
+
+            // -----------------------------------------------
+            // Invalid value
+            // -----------------------------------------------
+
+            if (!Array.isArray(raw)) {
+
+                raw = [];
+
+            }
+
+
+            // -----------------------------------------------
+            // Normalize every domain
+            // -----------------------------------------------
+
+            const domains =
+                raw
+                    .map(
+                        function (
+                            item
+                        ) {
+
+                            if (
+                                typeof item === "string"
+                            ) {
+
+                                return {
+                                    category:
+                                        item,
+
+                                    confidence:
+                                        null
+                                };
+
+                            }
+
+
+                            if (
+                                item &&
+                                typeof item === "object"
+                            ) {
+
+                                return {
+                                    category:
+                                        item.category ||
+                                        item.domain ||
+                                        item.label ||
+                                        item.name ||
+                                        "",
+
+                                    confidence:
+                                        item.confidence ??
+                                        item.probability ??
+                                        item.score ??
+                                        null
+                                };
+
+                            }
+
+
+                            return null;
+
+                        }
+                    )
+                    .filter(
+                        function (
+                            item
+                        ) {
+
+                            return (
+                                item &&
+                                item.category
+                            );
+
+                        }
+                    )
+                    .map(
+                        function (
+                            item
+                        ) {
+
+                            return {
+                                category:
+                                    String(
+                                        item.category
+                                    ).trim(),
+
+                                confidence:
+                                    normalizeConfidence(
+                                        item.confidence
+                                    )
+                            };
+
+                        }
+                    );
+
+
+            // -----------------------------------------------
+            // IMPORTANT FALLBACK
+            //
+            // If backend does not contain predicted_domains,
+            // use the primary category so old records continue
+            // to work.
+            // -----------------------------------------------
+
+            if (
+                domains.length === 0
+            ) {
+
+                const category =
+                    getPrimaryCategory(
+                        problem
+                    );
+
+                const confidence =
+                    normalizeConfidence(
+                        getPrimaryConfidence(
+                            problem
+                        )
+                    );
+
+
+                if (
+                    category &&
+                    category !== "Unclassified"
+                ) {
+
+                    domains.push({
+
+                        category:
+                            category,
+
+                        confidence:
+                            confidence
+
+                    });
+
+                }
+
+            }
+
+
+            return domains;
+
+        }
+
+
+        // ====================================================
+        // GET CLASSIFICATION MODE
+        //
+        // IMPORTANT:
+        // > 60%  = Single domain
+        // <= 60% = Multi-domain
+        // ====================================================
+
+        function getClassificationMode(
+            problem,
+            domains
+        ) {
+
+            const primaryConfidence =
+                normalizeConfidence(
+                    getPrimaryConfidence(
+                        problem
+                    )
+                );
+
+
+            if (
+                primaryConfidence !== null &&
+                primaryConfidence > 60
+            ) {
+
+                return "Single-domain assignment";
+
+            }
+
+
+            if (
+                domains.length > 1
+            ) {
+
+                return "Multi-domain assignment";
+
+            }
+
+
+            return "Multi-domain classification";
+
+        }
+
+
+        // ====================================================
+        // RENDER ASSIGNED DOMAINS
+        // ====================================================
+
+        function renderAssignedDomains(
+            domains,
+            container
+        ) {
+
+            if (!container) {
+
+                return;
+
+            }
+
+
+            if (
+                !domains ||
+                domains.length === 0
+            ) {
+
+                container.innerHTML =
+                    `
+                    <span class="assigned-domain-item">
+                        <span class="assigned-domain-name">
+                            No assigned domains
+                        </span>
+                    </span>
+                    `;
+
+                return;
+
+            }
+
+
+            container.innerHTML =
+                domains
+                    .map(
+                        function (
+                            domain
+                        ) {
+
+                            const confidenceText =
+                                domain.confidence !== null
+                                    ? domain.confidence.toFixed(2) + "%"
+                                    : "N/A";
+
+
+                            return `
+                                <span class="assigned-domain-item">
+
+                                    <span class="assigned-domain-name">
+                                        ${escapeHtml(
+                                            domain.category
+                                        )}
+                                    </span>
+
+                                    <span class="assigned-domain-confidence">
+                                        ${confidenceText}
+                                    </span>
+
+                                </span>
+                            `;
+
+                        }
+                    )
+                    .join("");
 
         }
 
@@ -684,6 +1225,30 @@
                     allProblems =
                         data.problems ||
                         [];
+
+
+                    console.log(
+                        "CrowdSolve problems loaded:",
+                        allProblems
+                    );
+
+
+                    allProblems.forEach(
+                        function (
+                            problem
+                        ) {
+
+                            console.log(
+                                "Problem",
+                                problem.id,
+                                "assigned domains:",
+                                getAssignedDomains(
+                                    problem
+                                )
+                            );
+
+                        }
+                    );
 
 
                     populateCategories();
@@ -746,6 +1311,10 @@
 
         // ====================================================
         // POPULATE CATEGORY FILTER
+        //
+        // IMPORTANT:
+        // Build categories from ALL assigned domains,
+        // not just the primary category.
         // ====================================================
 
         function populateCategories() {
@@ -754,31 +1323,72 @@
                 categoryFilter.value;
 
 
+            const categoryMap =
+                new Map();
+
+
+            allProblems.forEach(
+                function (
+                    problem
+                ) {
+
+                    const domains =
+                        getAssignedDomains(
+                            problem
+                        );
+
+
+                    domains.forEach(
+                        function (
+                            domain
+                        ) {
+
+                            const originalName =
+                                domain.category;
+
+
+                            const normalized =
+                                normalizeDomainName(
+                                    originalName
+                                );
+
+
+                            if (
+                                normalized &&
+                                !categoryMap.has(
+                                    normalized
+                                )
+                            ) {
+
+                                categoryMap.set(
+                                    normalized,
+                                    originalName
+                                );
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+
             const categories =
-                [
-                    ...new Set(
+                Array.from(
+                    categoryMap.values()
+                ).sort(
+                    function (
+                        a,
+                        b
+                    ) {
 
-                        allProblems
+                        return a.localeCompare(
+                            b
+                        );
 
-                            .map(
-                                function (problem) {
-
-                                    return (
-                                        problem.category ||
-                                        problem.predicted_category ||
-                                        ""
-                                    );
-
-                                }
-                            )
-
-                            .filter(
-                                Boolean
-                            )
-
-                    )
-
-                ].sort();
+                    }
+                );
 
 
             categoryFilter.innerHTML =
@@ -790,7 +1400,9 @@
 
 
             categories.forEach(
-                function (category) {
+                function (
+                    category
+                ) {
 
                     const option =
                         document.createElement(
@@ -815,15 +1427,96 @@
 
 
             if (
-                categories.includes(
-                    currentValue
+                currentValue &&
+                categories.some(
+                    function (
+                        category
+                    ) {
+
+                        return (
+                            normalizeDomainName(
+                                category
+                            ) ===
+                            normalizeDomainName(
+                                currentValue
+                            )
+                        );
+
+                    }
                 )
             ) {
 
+                const matchingCategory =
+                    categories.find(
+                        function (
+                            category
+                        ) {
+
+                            return (
+                                normalizeDomainName(
+                                    category
+                                ) ===
+                                normalizeDomainName(
+                                    currentValue
+                                )
+                            );
+
+                        }
+                    );
+
+
                 categoryFilter.value =
-                    currentValue;
+                    matchingCategory;
 
             }
+
+        }
+
+
+        // ====================================================
+        // CHECK WHETHER CATEGORY EXISTS IN ASSIGNED DOMAINS
+        //
+        // THIS IS THE KEY FIX.
+        // ====================================================
+
+        function problemHasCategory(
+            problem,
+            selectedCategory
+        ) {
+
+            if (!selectedCategory) {
+
+                return true;
+
+            }
+
+
+            const target =
+                normalizeDomainName(
+                    selectedCategory
+                );
+
+
+            const domains =
+                getAssignedDomains(
+                    problem
+                );
+
+
+            return domains.some(
+                function (
+                    domain
+                ) {
+
+                    return (
+                        normalizeDomainName(
+                            domain.category
+                        ) ===
+                        target
+                    );
+
+                }
+            );
 
         }
 
@@ -835,8 +1528,7 @@
         function filterProblems() {
 
             const selectedCategory =
-                categoryFilter.value
-                    .toLowerCase();
+                categoryFilter.value;
 
 
             const searchTerm =
@@ -847,16 +1539,9 @@
 
             const filteredProblems =
                 allProblems.filter(
-                    function (problem) {
-
-                        const category =
-                            (
-                                problem.category ||
-                                problem.predicted_category ||
-                                ""
-                            )
-                            .toLowerCase();
-
+                    function (
+                        problem
+                    ) {
 
                         const title =
                             (
@@ -874,11 +1559,22 @@
                             .toLowerCase();
 
 
-                        const categoryMatches =
-                            !selectedCategory ||
-                            category ===
-                            selectedCategory;
+                        // -----------------------------------
+                        // CATEGORY MATCH
+                        //
+                        // Searches EVERY assigned domain.
+                        // -----------------------------------
 
+                        const categoryMatches =
+                            problemHasCategory(
+                                problem,
+                                selectedCategory
+                            );
+
+
+                        // -----------------------------------
+                        // TEXT SEARCH
+                        // -----------------------------------
 
                         const searchMatches =
                             !searchTerm ||
@@ -949,133 +1645,194 @@
 
 
             problemsContainer.innerHTML =
-                problems.map(
-                    function (
-                        problem
-                    ) {
-
-                        const category =
-                            problem.category ||
-                            problem.predicted_category ||
-                            "Unclassified";
-
-
-                        const confidence =
-                            problem.confidence ??
-                            problem.prediction_confidence;
-
-
-                        let confidenceText =
-                            "N/A";
-
-
-                        if (
-                            confidence !== null &&
-                            confidence !== undefined
+                problems
+                    .map(
+                        function (
+                            problem
                         ) {
 
-                            const number =
-                                Number(
-                                    confidence
+                            const category =
+                                getPrimaryCategory(
+                                    problem
                                 );
 
 
-                            confidenceText =
-                                (
-                                    number <= 1
-                                        ? number * 100
-                                        : number
+                            const confidence =
+                                normalizeConfidence(
+                                    getPrimaryConfidence(
+                                        problem
+                                    )
+                                );
+
+
+                            const confidenceText =
+                                confidence !== null
+                                    ? confidence.toFixed(2) + "%"
+                                    : "N/A";
+
+
+                            const domains =
+                                getAssignedDomains(
+                                    problem
+                                );
+
+
+                            const classificationMode =
+                                getClassificationMode(
+                                    problem,
+                                    domains
+                                );
+
+
+                            const selectedClass =
+                                selectedProblem &&
+                                Number(
+                                    selectedProblem.id
+                                ) ===
+                                Number(
+                                    problem.id
                                 )
-                                .toFixed(2) +
-                                "%";
+                                    ? " selected"
+                                    : "";
+
+
+                            const domainsHtml =
+                                domains
+                                    .map(
+                                        function (
+                                            domain
+                                        ) {
+
+                                            const domainConfidence =
+                                                domain.confidence !== null
+                                                    ? domain.confidence.toFixed(2) + "%"
+                                                    : "N/A";
+
+
+                                            return `
+                                                <span class="assigned-domain-item">
+
+                                                    <span class="assigned-domain-name">
+                                                        ${escapeHtml(
+                                                            domain.category
+                                                        )}
+                                                    </span>
+
+                                                    <span class="assigned-domain-confidence">
+                                                        ${domainConfidence}
+                                                    </span>
+
+                                                </span>
+                                            `;
+
+                                        }
+                                    )
+                                    .join("");
+
+
+                            return `
+                                <article
+                                    class="solver-problem-card${selectedClass}"
+                                    data-problem-id="${problem.id}"
+                                >
+
+                                    <div
+                                        class="solver-problem-header"
+                                    >
+
+                                        <span
+                                            class="category-badge"
+                                        >
+                                            ${escapeHtml(
+                                                category
+                                            )}
+                                        </span>
+
+
+                                        <span
+                                            class="confidence-badge"
+                                        >
+                                            ${confidenceText}
+                                            confidence
+                                        </span>
+
+                                    </div>
+
+
+                                    <h3>
+                                        ${escapeHtml(
+                                            problem.title ||
+                                            "Untitled Problem"
+                                        )}
+                                    </h3>
+
+
+                                    <p>
+                                        ${escapeHtml(
+                                            truncateText(
+                                                problem.description,
+                                                220
+                                            )
+                                        )}
+                                    </p>
+
+
+                                    <!-- ASSIGNED DOMAINS -->
+
+                                    <div
+                                        class="assigned-domains-section"
+                                    >
+
+                                        <span
+                                            class="assigned-domains-title"
+                                        >
+                                            Assigned Domain(s)
+                                        </span>
+
+
+                                        <span
+                                            class="classification-mode"
+                                        >
+                                            ${escapeHtml(
+                                                classificationMode
+                                            )}
+                                        </span>
+
+
+                                        <div
+                                            class="assigned-domains-list"
+                                        >
+                                            ${domainsHtml}
+                                        </div>
+
+                                    </div>
+
+
+                                    <div
+                                        class="solver-problem-footer"
+                                    >
+
+                                        <span>
+                                            Problem ID:
+                                            ${problem.id}
+                                        </span>
+
+
+                                        <button
+                                            class="btn btn-primary btn-small select-problem-button"
+                                            data-problem-id="${problem.id}"
+                                        >
+                                            Solve This Problem
+                                        </button>
+
+                                    </div>
+
+                                </article>
+                            `;
 
                         }
-
-
-                        const selectedClass =
-                            selectedProblem &&
-                            selectedProblem.id ===
-                            problem.id
-                                ? " selected"
-                                : "";
-
-
-                        return `
-
-                            <article
-                                class="solver-problem-card${selectedClass}"
-                                data-problem-id="${problem.id}"
-                            >
-
-                                <div
-                                    class="solver-problem-header"
-                                >
-
-                                    <span
-                                        class="category-badge"
-                                    >
-                                        ${escapeHtml(
-                                            category
-                                        )}
-                                    </span>
-
-
-                                    <span
-                                        class="confidence-badge"
-                                    >
-                                        ${confidenceText}
-                                        confidence
-                                    </span>
-
-                                </div>
-
-
-                                <h3>
-                                    ${escapeHtml(
-                                        problem.title
-                                    )}
-                                </h3>
-
-
-                                <p>
-
-                                    ${escapeHtml(
-                                        truncateText(
-                                            problem.description,
-                                            220
-                                        )
-                                    )}
-
-                                </p>
-
-
-                                <div
-                                    class="solver-problem-footer"
-                                >
-
-                                    <span>
-
-                                        Problem ID:
-                                        ${problem.id}
-
-                                    </span>
-
-
-                                    <button
-                                        class="btn btn-primary btn-small select-problem-button"
-                                        data-problem-id="${problem.id}"
-                                    >
-                                        Solve This Problem
-                                    </button>
-
-                                </div>
-
-                            </article>
-
-                        `;
-
-                    }
-                ).join("");
+                    )
+                    .join("");
 
 
             document.querySelectorAll(
@@ -1144,41 +1901,37 @@
 
 
             const category =
-                selectedProblem.category ||
-                selectedProblem.predicted_category ||
-                "Unclassified";
+                getPrimaryCategory(
+                    selectedProblem
+                );
 
 
             const confidence =
-                selectedProblem.confidence ??
-                selectedProblem.prediction_confidence;
-
-
-            let confidenceText =
-                "Confidence unavailable";
-
-
-            if (
-                confidence !== null &&
-                confidence !== undefined
-            ) {
-
-                const number =
-                    Number(
-                        confidence
-                    );
-
-
-                confidenceText =
-                    (
-                        number <= 1
-                            ? number * 100
-                            : number
+                normalizeConfidence(
+                    getPrimaryConfidence(
+                        selectedProblem
                     )
-                    .toFixed(2) +
-                    "% confidence";
+                );
 
-            }
+
+            const confidenceText =
+                confidence !== null
+                    ? confidence.toFixed(2) +
+                      "% confidence"
+                    : "Confidence unavailable";
+
+
+            const domains =
+                getAssignedDomains(
+                    selectedProblem
+                );
+
+
+            const classificationMode =
+                getClassificationMode(
+                    selectedProblem,
+                    domains
+                );
 
 
             selectedProblemInfo.classList.add(
@@ -1218,6 +1971,20 @@
 
 
             document.getElementById(
+                "selectedClassificationMode"
+            ).textContent =
+                classificationMode;
+
+
+            renderAssignedDomains(
+                domains,
+                document.getElementById(
+                    "selectedDomains"
+                )
+            );
+
+
+            document.getElementById(
                 "mlPredictedCategory"
             ).textContent =
                 category;
@@ -1249,13 +2016,14 @@
 
         // ====================================================
         // GET CURRENTLY FILTERED PROBLEMS
+        //
+        // USE THE SAME MULTI-DOMAIN FILTER LOGIC.
         // ====================================================
 
         function getCurrentlyFilteredProblems() {
 
             const selectedCategory =
-                categoryFilter.value
-                    .toLowerCase();
+                categoryFilter.value;
 
 
             const searchTerm =
@@ -1268,15 +2036,6 @@
                 function (
                     problem
                 ) {
-
-                    const category =
-                        (
-                            problem.category ||
-                            problem.predicted_category ||
-                            ""
-                        )
-                        .toLowerCase();
-
 
                     const title =
                         (
@@ -1294,30 +2053,26 @@
                         .toLowerCase();
 
 
-                    return (
-
-                        (
-                            !selectedCategory ||
-                            category ===
+                    const categoryMatches =
+                        problemHasCategory(
+                            problem,
                             selectedCategory
-                        )
+                        );
 
-                        &&
 
-                        (
-                            !searchTerm ||
+                    const searchMatches =
+                        !searchTerm ||
+                        title.includes(
+                            searchTerm
+                        ) ||
+                        description.includes(
+                            searchTerm
+                        );
 
-                            title.includes(
-                                searchTerm
-                            )
 
-                            ||
-
-                            description.includes(
-                                searchTerm
-                            )
-                        )
-
+                    return (
+                        categoryMatches &&
+                        searchMatches
                     );
 
                 }
@@ -1465,9 +2220,7 @@
                                     "Submit Solution";
 
                             },
-
                             1000
-
                         );
 
                     }
@@ -1475,12 +2228,9 @@
                     else {
 
                         showMessage(
-
                             data.message ||
                             "Unable to submit your solution.",
-
                             "error"
-
                         );
 
 
@@ -1504,11 +2254,8 @@
 
 
                     showMessage(
-
                         "Unable to connect to the server.",
-
                         "error"
-
                     );
 
 
@@ -1661,6 +2408,7 @@
         // ====================================================
 
         loadProblems();
+
 
     </script>
 

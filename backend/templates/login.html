@@ -3,7 +3,6 @@
 
 <head>
     <meta charset="UTF-8">
-
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
@@ -15,6 +14,98 @@
         rel="stylesheet"
         href="{{ url_for('static', filename='css/style.css') }}"
     >
+
+    <style>
+        /*
+         * Login-page role selection.
+         * The existing registration page already uses role cards;
+         * these styles make the login selection visually consistent.
+         */
+
+        .login-role-selection {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .login-role-option {
+            position: relative;
+            display: block;
+            cursor: pointer;
+        }
+
+        .login-role-option input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .login-role-content {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-height: 82px;
+            padding: 16px;
+            box-sizing: border-box;
+            border: 1px solid #263752;
+            border-radius: 14px;
+            background: #080f1d;
+            transition:
+                border-color 0.2s ease,
+                background 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .login-role-content:hover {
+            border-color: #2d8cff;
+            transform: translateY(-1px);
+        }
+
+        .login-role-option input:checked + .login-role-content {
+            border-color: #2d8cff;
+            background: rgba(30, 136, 229, 0.10);
+            box-shadow: 0 0 0 1px rgba(45, 140, 255, 0.18);
+        }
+
+        .login-role-icon {
+            flex: 0 0 44px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #0b2344;
+            color: #2d8cff;
+            font-weight: 800;
+            font-size: 1rem;
+        }
+
+        .login-role-text {
+            min-width: 0;
+        }
+
+        .login-role-text strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #f5f7fb;
+            font-size: 1rem;
+        }
+
+        .login-role-text span {
+            display: block;
+            color: #8fa7c5;
+            font-size: 0.82rem;
+            line-height: 1.45;
+        }
+
+        @media (max-width: 600px) {
+            .login-role-selection {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 
@@ -60,8 +151,8 @@
                 </h1>
 
                 <p>
-                    Access your dashboard and continue solving
-                    problems together.
+                    Select your role, then enter your account
+                    credentials to access the correct dashboard.
                 </p>
 
             </div>
@@ -136,6 +227,101 @@
                 </div>
 
 
+                <!-- =================================================
+                     ROLE SELECTION
+                ================================================== -->
+
+                <div class="form-group">
+
+                    <label>
+                        Choose Your Role
+                    </label>
+
+                    <div class="login-role-selection">
+
+
+                        <!-- PROBLEMER -->
+
+                        <label
+                            class="login-role-option"
+                            for="loginProblemer"
+                        >
+
+                            <input
+                                type="radio"
+                                id="loginProblemer"
+                                name="role"
+                                value="problemer"
+                                required
+                            >
+
+                            <div class="login-role-content">
+
+                                <div class="login-role-icon">
+                                    P
+                                </div>
+
+                                <div class="login-role-text">
+
+                                    <strong>
+                                        Problemer
+                                    </strong>
+
+                                    <span>
+                                        Post problems and receive
+                                        multiple solutions.
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </label>
+
+
+                        <!-- SOLVER -->
+
+                        <label
+                            class="login-role-option"
+                            for="loginSolver"
+                        >
+
+                            <input
+                                type="radio"
+                                id="loginSolver"
+                                name="role"
+                                value="solver"
+                                required
+                            >
+
+                            <div class="login-role-content">
+
+                                <div class="login-role-icon">
+                                    S
+                                </div>
+
+                                <div class="login-role-text">
+
+                                    <strong>
+                                        Solver
+                                    </strong>
+
+                                    <span>
+                                        Browse problems and submit
+                                        your solutions.
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+
                 <!-- SUBMIT -->
 
                 <button
@@ -166,7 +352,7 @@
             </div>
 
 
-            <!-- ML NOTE -->
+            <!-- PLATFORM INFO -->
 
             <div class="auth-info">
 
@@ -187,7 +373,7 @@
 
 
     <!-- =====================================================
-         JAVASCRIPT
+         MAIN JAVASCRIPT
     ====================================================== -->
 
     <script
@@ -292,6 +478,36 @@
                         .value;
 
 
+                const selectedRole =
+                    document.querySelector(
+                        'input[name="role"]:checked'
+                    );
+
+
+                // =============================================
+                // VALIDATE ROLE
+                // =============================================
+
+                if (!selectedRole) {
+
+                    showMessage(
+                        "Please select whether you are a Problemer or Solver.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                const role =
+                    selectedRole.value;
+
+
+                // =============================================
+                // DISABLE BUTTON
+                // =============================================
+
                 loginButton.disabled =
                     true;
 
@@ -300,6 +516,10 @@
 
 
                 try {
+
+                    // =========================================
+                    // CALL BACKEND API
+                    // =========================================
 
                     const response =
                         await fetch(
@@ -319,7 +539,9 @@
 
                                     email: email,
 
-                                    password: password
+                                    password: password,
+
+                                    role: role
 
                                 })
 
@@ -336,25 +558,55 @@
                         data.success
                     ) {
 
+                        const user =
+                            data.user || data;
+
+
+                        /*
+                         * The current backend authenticates the
+                         * credentials and returns the stored role.
+                         *
+                         * Verify the selected role before allowing
+                         * the user into a dashboard.
+                         */
+
+                        const actualRole =
+                            String(
+                                user.role || ""
+                            )
+                            .trim()
+                            .toLowerCase();
+
+
+                        if (
+                            actualRole !== role
+                        ) {
+
+                            showMessage(
+                                "The selected role does not match this account. Please choose the correct role.",
+                                "error"
+                            );
+
+                            loginButton.disabled =
+                                false;
+
+                            loginButton.textContent =
+                                "Login";
+
+                            return;
+
+                        }
+
+
                         showMessage(
                             "Login successful. Redirecting...",
                             "success"
                         );
 
 
-                        /*
-                        ------------------------------------------------
-                        STORE USER INFORMATION
-
-                        The exact field names are handled safely
-                        so the frontend can work with the backend
-                        response structure.
-                        ------------------------------------------------
-                        */
-
-                        const user =
-                            data.user || data;
-
+                        // =========================================
+                        // STORE USER INFORMATION
+                        // =========================================
 
                         localStorage.setItem(
 
@@ -367,17 +619,15 @@
                         );
 
 
-                        /*
-                        ------------------------------------------------
-                        REDIRECT BASED ON USER ROLE
-                        ------------------------------------------------
-                        */
+                        // =========================================
+                        // REDIRECT BASED ON SELECTED ROLE
+                        // =========================================
 
                         setTimeout(
                             function () {
 
                                 if (
-                                    user.role ===
+                                    role ===
                                     "problemer"
                                 ) {
 
@@ -387,30 +637,12 @@
                                 }
 
                                 else if (
-                                    user.role ===
+                                    role ===
                                     "solver"
                                 ) {
 
                                     window.location.href =
                                         "/solver-dashboard";
-
-                                }
-
-                                else {
-
-                                    showMessage(
-
-                                        "Login succeeded, but the user role is invalid.",
-
-                                        "error"
-
-                                    );
-
-                                    loginButton.disabled =
-                                        false;
-
-                                    loginButton.textContent =
-                                        "Login";
 
                                 }
 
@@ -475,5 +707,4 @@
     </script>
 
 </body>
-
 </html>

@@ -1,617 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CrowdSolve | AI-Powered Problem Solving</title>
 
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='css/style.css') }}"
     >
+
+    <style>
+        /*
+         * Landing-page-only layout.
+         * This keeps the existing global stylesheet and Flask routes intact,
+         * while making the home page intentionally minimal.
+         */
+
+        body.crowdsolve-home {
+            min-height: 100vh;
+            margin: 0;
+            background:
+                radial-gradient(circle at 50% 42%, rgba(30, 136, 229, 0.10), transparent 34%),
+                #050b16;
+            color: #f5f7fb;
+            overflow-x: hidden;
+        }
+
+        .home-navbar {
+            width: 100%;
+            padding: 24px 5%;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .home-navbar .logo {
+            text-decoration: none;
+        }
+
+        .home-login {
+            color: #8fa7c5;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.2s ease;
+        }
+
+        .home-login:hover {
+            color: #2d8cff;
+        }
+
+        .home-main {
+            min-height: calc(100vh - 86px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px 80px;
+            box-sizing: border-box;
+        }
+
+        .home-hero {
+            width: min(900px, 100%);
+            text-align: center;
+            margin: 0 auto;
+        }
+
+        .home-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(45, 140, 255, 0.45);
+            border-radius: 999px;
+            color: #2d8cff;
+            background: rgba(15, 36, 65, 0.55);
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .home-hero h1 {
+            max-width: 820px;
+            margin: 0 auto 24px;
+            font-size: clamp(3rem, 7vw, 5.8rem);
+            line-height: 1.02;
+            letter-spacing: -0.045em;
+        }
+
+        .home-hero h1 span {
+            color: #2d8cff;
+        }
+
+        .home-description {
+            max-width: 690px;
+            margin: 0 auto;
+            color: #9eb2ce;
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            line-height: 1.75;
+        }
+
+        .home-action {
+            margin-top: 42px;
+        }
+
+        .home-action .btn {
+            min-width: 210px;
+            min-height: 58px;
+            font-size: 1.05rem;
+        }
+
+        .home-ml-note {
+            margin: 38px auto 0;
+            color: #657c9b;
+            font-size: 0.88rem;
+        }
+
+        .home-ml-note strong {
+            color: #8fa7c5;
+        }
+
+        @media (max-width: 640px) {
+            .home-navbar {
+                padding: 20px;
+            }
+
+            .home-main {
+                min-height: calc(100vh - 72px);
+                padding: 30px 20px 60px;
+            }
+
+            .home-hero h1 {
+                font-size: clamp(2.7rem, 13vw, 4rem);
+            }
+
+            .home-description {
+                font-size: 0.98rem;
+            }
+
+            .home-action .btn {
+                width: min(100%, 300px);
+            }
+        }
+    </style>
 </head>
 
+<body class="crowdsolve-home">
 
-<body>
+    <nav class="home-navbar">
+        <a href="/" class="logo">
+            Crowd<span>Solve</span>
+        </a>
 
-    <!-- =====================================================
-         NAVIGATION BAR
-    ====================================================== -->
-
-    <nav class="navbar">
-
-        <div class="nav-container">
-
-            <a href="/" class="logo">
-                Crowd<span>Solve</span>
-            </a>
-
-
-            <div class="nav-links">
-
-                <a href="#how-it-works">
-                    How It Works
-                </a>
-
-                <a href="{{ url_for('login_page') }}">
-                    Login
-                </a>
-
-                <a
-                    href="{{ url_for('register_page') }}"
-                    class="btn btn-primary"
-                >
-                    Get Started
-                </a>
-
-            </div>
-
-        </div>
-
+        <a
+            href="{{ url_for('login_page') }}"
+            class="home-login"
+        >
+            Login
+        </a>
     </nav>
 
 
-    <!-- =====================================================
-         HERO SECTION
-    ====================================================== -->
+    <main class="home-main">
+        <section class="home-hero">
 
-    <section class="hero">
-
-        <div class="hero-content">
-
-            <div class="hero-badge">
+            <div class="home-badge">
                 AI-Powered Crowdsourced Problem Solving
             </div>
 
-
             <h1>
-                Post a Problem.
-                <br>
-
-                <span>
-                    Let the Right Minds Solve It.
-                </span>
+                Post a Problem.<br>
+                <span>Let the Right Minds Solve It.</span>
             </h1>
 
-
-            <p class="hero-description">
-
-                CrowdSolve uses Machine Learning and TF-IDF
-                text classification to automatically identify
-                the domain of your problem and make it available
-                to expert solvers.
-
+            <p class="home-description">
+                CrowdSolve uses TF-IDF text vectorization and a trained
+                Logistic Regression model to classify technical problems
+                and connect them with relevant solvers.
             </p>
 
-
-            <div class="hero-buttons">
-
+            <div class="home-action">
                 <a
                     href="{{ url_for('register_page') }}"
                     class="btn btn-primary btn-large"
                 >
                     Get Started
                 </a>
-
-
-                <a
-                    href="#how-it-works"
-                    class="btn btn-secondary btn-large"
-                >
-                    See How It Works
-                </a>
-
             </div>
 
-
-            <!-- ML INFORMATION -->
-
-            <div class="ml-info">
-
-                <div class="ml-info-item">
-
-                    <strong>
-                        TF-IDF
-                    </strong>
-
-                    <span>
-                        Text Vectorization
-                    </span>
-
-                </div>
-
-
-                <div class="ml-divider"></div>
-
-
-                <div class="ml-info-item">
-
-                    <strong>
-                        Logistic Regression
-                    </strong>
-
-                    <span>
-                        Problem Classification
-                    </span>
-
-                </div>
-
-
-                <div class="ml-divider"></div>
-
-
-                <div class="ml-info-item">
-
-                    <strong>
-                        10 Categories
-                    </strong>
-
-                    <span>
-                        Technology Domains
-                    </span>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- =====================================================
-         HOW IT WORKS
-    ====================================================== -->
-
-    <section
-        class="how-it-works"
-        id="how-it-works"
-    >
-
-        <div class="section-header">
-
-            <span class="section-tag">
-                WORKFLOW
-            </span>
-
-            <h2>
-                How CrowdSolve Works
-            </h2>
-
-            <p>
-                From problem submission to multiple solutions,
-                powered by Machine Learning.
+            <p class="home-ml-note">
+                <strong>ML Pipeline:</strong>
+                TF-IDF &nbsp;→&nbsp; Logistic Regression &nbsp;→&nbsp; Technical Domain
             </p>
 
-        </div>
+        </section>
+    </main>
 
-
-        <div class="workflow-container">
-
-
-            <!-- STEP 1 -->
-
-            <div class="workflow-card">
-
-                <div class="step-number">
-                    01
-                </div>
-
-                <div class="step-icon">
-                    P
-                </div>
-
-                <h3>
-                    Post a Problem
-                </h3>
-
-                <p>
-                    A user submits a technical problem
-                    through the CrowdSolve platform.
-                </p>
-
-            </div>
-
-
-            <div class="workflow-arrow">
-                →
-            </div>
-
-
-            <!-- STEP 2 -->
-
-            <div class="workflow-card">
-
-                <div class="step-number">
-                    02
-                </div>
-
-                <div class="step-icon">
-                    ML
-                </div>
-
-                <h3>
-                    ML Classification
-                </h3>
-
-                <p>
-                    The problem is preprocessed, converted
-                    using TF-IDF, and classified by the
-                    trained Logistic Regression model.
-                </p>
-
-            </div>
-
-
-            <div class="workflow-arrow">
-                →
-            </div>
-
-
-            <!-- STEP 3 -->
-
-            <div class="workflow-card">
-
-                <div class="step-number">
-                    03
-                </div>
-
-                <div class="step-icon">
-                    S
-                </div>
-
-                <h3>
-                    Solver Pool
-                </h3>
-
-                <p>
-                    The classified problem appears in the
-                    common problem pool where expert solvers
-                    can choose problems to solve.
-                </p>
-
-            </div>
-
-
-            <div class="workflow-arrow">
-                →
-            </div>
-
-
-            <!-- STEP 4 -->
-
-            <div class="workflow-card">
-
-                <div class="step-number">
-                    04
-                </div>
-
-                <div class="step-icon">
-                    ✓
-                </div>
-
-                <h3>
-                    Multiple Solutions
-                </h3>
-
-                <p>
-                    Multiple solvers can submit their
-                    solutions, allowing the problem owner
-                    to evaluate different approaches.
-                </p>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- =====================================================
-         MACHINE LEARNING SECTION
-    ====================================================== -->
-
-    <section class="ml-section">
-
-        <div class="section-header">
-
-            <span class="section-tag">
-                MACHINE LEARNING METHODS
-            </span>
-
-            <h2>
-                Transparent Problem Classification
-            </h2>
-
-            <p>
-                The classification process is visible in
-                the application so the Machine Learning
-                workflow can be demonstrated clearly.
-            </p>
-
-        </div>
-
-
-        <div class="ml-pipeline">
-
-
-            <div class="pipeline-step">
-
-                <div class="pipeline-label">
-                    INPUT
-                </div>
-
-                <h3>
-                    Raw Problem
-                </h3>
-
-                <p>
-                    User-submitted technical problem.
-                </p>
-
-            </div>
-
-
-            <div class="pipeline-arrow">
-                ↓
-            </div>
-
-
-            <div class="pipeline-step">
-
-                <div class="pipeline-label">
-                    NLP
-                </div>
-
-                <h3>
-                    Text Preprocessing
-                </h3>
-
-                <p>
-                    Lowercasing, tokenization, stopword
-                    removal and text cleaning.
-                </p>
-
-            </div>
-
-
-            <div class="pipeline-arrow">
-                ↓
-            </div>
-
-
-            <div class="pipeline-step">
-
-                <div class="pipeline-label">
-                    FEATURE EXTRACTION
-                </div>
-
-                <h3>
-                    TF-IDF Vectorization
-                </h3>
-
-                <p>
-                    Text converted into numerical features.
-                </p>
-
-            </div>
-
-
-            <div class="pipeline-arrow">
-                ↓
-            </div>
-
-
-            <div class="pipeline-step pipeline-highlight">
-
-                <div class="pipeline-label">
-                    MACHINE LEARNING
-                </div>
-
-                <h3>
-                    Logistic Regression
-                </h3>
-
-                <p>
-                    Predicts the most appropriate technology
-                    category with a confidence score.
-                </p>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- =====================================================
-         USER ROLES
-    ====================================================== -->
-
-    <section class="roles-section">
-
-        <div class="section-header">
-
-            <span class="section-tag">
-                PLATFORM USERS
-            </span>
-
-            <h2>
-                Two Roles. One Problem-Solving Network.
-            </h2>
-
-        </div>
-
-
-        <div class="roles-container">
-
-
-            <!-- PROBLEMER -->
-
-            <div class="role-card">
-
-                <div class="role-label">
-                    PROBLEMER
-                </div>
-
-                <h3>
-                    Need a Problem Solved?
-                </h3>
-
-                <p>
-                    Submit your problem and receive multiple
-                    solutions from available expert solvers.
-                </p>
-
-                <ul>
-
-                    <li>
-                        Submit technical problems
-                    </li>
-
-                    <li>
-                        View ML classification
-                    </li>
-
-                    <li>
-                        Receive multiple solutions
-                    </li>
-
-                    <li>
-                        Evaluate submitted answers
-                    </li>
-
-                </ul>
-
-            </div>
-
-
-            <!-- SOLVER -->
-
-            <div class="role-card">
-
-                <div class="role-label">
-                    SOLVER
-                </div>
-
-                <h3>
-                    Solve Problems in Your Expertise
-                </h3>
-
-                <p>
-                    Browse the common problem pool and choose
-                    problems related to your expertise.
-                </p>
-
-                <ul>
-
-                    <li>
-                        Browse available problems
-                    </li>
-
-                    <li>
-                        Filter by ML category
-                    </li>
-
-                    <li>
-                        Select problems to solve
-                    </li>
-
-                    <li>
-                        Submit detailed solutions
-                    </li>
-
-                </ul>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- =====================================================
-         CALL TO ACTION
-    ====================================================== -->
-
-    <section class="cta-section">
-
-        <h2>
-            Ready to Solve Problems Together?
-        </h2>
-
-        <p>
-            Join CrowdSolve and experience AI-powered
-            crowdsourced problem solving.
-        </p>
-
-        <a
-            href="{{ url_for('register_page') }}"
-            class="btn btn-primary btn-large"
-        >
-            Create an Account
-        </a>
-
-    </section>
-
-
-    <!-- =====================================================
-         FOOTER
-    ====================================================== -->
-
-    <footer class="footer">
-
-        <div class="footer-container">
-
-            <div>
-
-                <h3>
-                    Crowd<span>Solve</span>
-                </h3>
-
-                <p>
-                    AI-powered crowdsourced problem-solving
-                    platform.
-                </p>
-
-            </div>
-
-
-            <div class="footer-ml">
-
-                <strong>
-                    Machine Learning Methods
-                </strong>
-
-                <span>
-                    TF-IDF Vectorization
-                </span>
-
-                <span>
-                    Logistic Regression Classification
-                </span>
-
-            </div>
-
-        </div>
-
-    </footer>
-
-
-    <!-- =====================================================
-         JAVASCRIPT
-    ====================================================== -->
 
     <script
         src="{{ url_for('static', filename='js/app.js') }}"
     ></script>
 
 </body>
-
 </html>

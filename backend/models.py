@@ -136,25 +136,74 @@ class Problem(db.Model):
     )
 
 
-    # Machine Learning Predicted Category
+    # --------------------------------------------------------
+    # PRIMARY ML PREDICTION
+    # --------------------------------------------------------
+
+    # Highest-confidence predicted category
     predicted_category = db.Column(
         db.String(100)
     )
 
 
-    # ML Prediction Confidence
+    # --------------------------------------------------------
+    # ML PREDICTION CONFIDENCE
+    # --------------------------------------------------------
+
+    # Confidence of the primary prediction
     confidence = db.Column(
         db.Numeric(5, 2)
     )
 
 
-    # Top 3 ML Predictions
+    # --------------------------------------------------------
+    # TOP 3 ML PREDICTIONS
+    # --------------------------------------------------------
+
+    # Stores the top 3 model predictions and probabilities
     top_predictions = db.Column(
         db.JSON
     )
 
 
-    # User Who Created the Problem
+    # --------------------------------------------------------
+    # ASSIGNED ML DOMAINS
+    # --------------------------------------------------------
+
+    # Stores the actual domain(s) assigned to the problem
+    # based on the confidence thresholds in prediction_module.py.
+    #
+    # Example:
+    #
+    # [
+    #     {
+    #         "category": "html / css",
+    #         "confidence": 25.26
+    #     },
+    #     {
+    #         "category": "javascript",
+    #         "confidence": 25.10
+    #     }
+    # ]
+    #
+    # High-confidence problem:
+    #
+    # [
+    #     {
+    #         "category": "node.js",
+    #         "confidence": 91.31
+    #     }
+    # ]
+
+    predicted_domains = db.Column(
+        db.JSON
+    )
+
+
+    # --------------------------------------------------------
+    # USER WHO CREATED THE PROBLEM
+    # --------------------------------------------------------
+
     created_by = db.Column(
         db.Integer,
         db.ForeignKey(
@@ -209,17 +258,29 @@ class Problem(db.Model):
 
             "cleaned_text": self.cleaned_text,
 
-            "predicted_category": self.predicted_category,
+            # Primary ML prediction
+            "predicted_category": (
+                self.predicted_category
+            ),
 
+            # Primary prediction confidence
             "confidence": (
                 float(self.confidence)
                 if self.confidence is not None
                 else None
             ),
 
+            # Top 3 model predictions
             "top_predictions": (
                 self.top_predictions
                 if self.top_predictions
+                else []
+            ),
+
+            # Actual assigned domains
+            "predicted_domains": (
+                self.predicted_domains
+                if self.predicted_domains
                 else []
             ),
 

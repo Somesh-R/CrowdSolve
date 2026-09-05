@@ -15,6 +15,140 @@
         rel="stylesheet"
         href="{{ url_for('static', filename='css/style.css') }}"
     >
+
+    <style>
+        /* Solution viewer */
+        .solution-viewer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            z-index: 9999;
+        }
+
+        .solution-viewer-overlay.hidden {
+            display: none;
+        }
+
+        .solution-viewer-modal {
+            width: min(900px, 100%);
+            max-height: 88vh;
+            overflow: hidden;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .solution-viewer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .solution-viewer-header h2 {
+            margin: 0;
+        }
+
+        .solution-viewer-close {
+            border: 0;
+            background: transparent;
+            font-size: 28px;
+            line-height: 1;
+            cursor: pointer;
+            color: #374151;
+        }
+
+        .solution-viewer-body {
+            padding: 20px 24px 24px;
+            overflow-y: auto;
+        }
+
+        .solution-viewer-loading,
+        .solution-viewer-empty,
+        .solution-viewer-error {
+            padding: 24px;
+            text-align: center;
+            color: #4b5563;
+        }
+
+        .solution-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 16px;
+            background: #f9fafb;
+        }
+
+        .solution-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .solution-card-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 12px;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .solution-text {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            line-height: 1.7;
+            color: #111827;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .view-solutions-button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            border: 1px solid #2563eb;
+            border-radius: 6px;
+            background: #ffffff;
+            color: #2563eb;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .view-solutions-button:hover {
+            background: #2563eb;
+            color: #ffffff;
+        }
+
+        @media (max-width: 600px) {
+            .solution-viewer-overlay {
+                padding: 10px;
+            }
+
+            .solution-viewer-modal {
+                max-height: 94vh;
+            }
+
+            .solution-viewer-header,
+            .solution-viewer-body {
+                padding: 16px;
+            }
+
+            .solution-card-header {
+                flex-direction: column;
+                gap: 6px;
+            }
+        }
+    </style>
+
 </head>
 
 
@@ -85,7 +219,8 @@
                 <p>
                     Describe your problem. CrowdSolve will use
                     TF-IDF and the trained Machine Learning model
-                    to classify it automatically.
+                    to classify it automatically and assign the
+                    most relevant technical domain or domains.
                 </p>
 
             </div>
@@ -384,7 +519,9 @@
                         </div>
 
 
-                        <!-- RESULT -->
+                        <!-- =================================================
+                             ML RESULT
+                        ================================================== -->
 
                         <div
                             class="prediction-result"
@@ -395,16 +532,22 @@
                                 PREDICTION RESULT
                             </span>
 
+
+                            <!-- PRIMARY CATEGORY -->
+
                             <h3 id="predictedCategory">
                                 Waiting for problem...
                             </h3>
+
+
+                            <!-- CONFIDENCE -->
 
                             <div class="confidence-container">
 
                                 <div class="confidence-header">
 
                                     <span>
-                                        Confidence
+                                        Primary Confidence
                                     </span>
 
                                     <strong
@@ -428,6 +571,39 @@
 
                             </div>
 
+
+                            <!-- CLASSIFICATION MODE -->
+
+                            <div
+                                id="classificationMode"
+                                class="classification-mode"
+                            >
+                                Waiting for classification...
+                            </div>
+
+
+                            <!-- ASSIGNED DOMAINS -->
+
+                            <div
+                                id="assignedDomainsContainer"
+                                class="assigned-domains-container"
+                            >
+
+                                <div class="assigned-domains-title">
+                                    Assigned Domain(s)
+                                </div>
+
+                                <div
+                                    id="assignedDomains"
+                                    class="assigned-domains-list"
+                                >
+                                    <span class="assigned-domain-empty">
+                                        No domains assigned yet.
+                                    </span>
+                                </div>
+
+                            </div>
+
                         </div>
 
 
@@ -444,6 +620,7 @@
                         Model Information
                     </h3>
 
+
                     <div class="model-info-row">
 
                         <span>
@@ -455,6 +632,7 @@
                         </strong>
 
                     </div>
+
 
                     <div class="model-info-row">
 
@@ -468,6 +646,7 @@
 
                     </div>
 
+
                     <div class="model-info-row">
 
                         <span>
@@ -475,7 +654,33 @@
                         </span>
 
                         <strong>
-                            Problem Category
+                            Single / Multiple Domains
+                        </strong>
+
+                    </div>
+
+
+                    <div class="model-info-row">
+
+                        <span>
+                            High Confidence
+                        </span>
+
+                        <strong>
+                            &gt; 60%
+                        </strong>
+
+                    </div>
+
+
+                    <div class="model-info-row">
+
+                        <span>
+                            Multi-Domain Threshold
+                        </span>
+
+                        <strong>
+                            ≥ 15%
                         </strong>
 
                     </div>
@@ -537,6 +742,44 @@
     </main>
 
 
+
+    <!-- =====================================================
+         SOLUTION VIEWER
+    ====================================================== -->
+    <div
+        id="solutionViewerOverlay"
+        class="solution-viewer-overlay hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="solutionViewerTitle"
+    >
+        <div class="solution-viewer-modal">
+            <div class="solution-viewer-header">
+                <div>
+                    <span class="section-tag">SUBMITTED SOLUTIONS</span>
+                    <h2 id="solutionViewerTitle">Solutions</h2>
+                </div>
+                <button
+                    type="button"
+                    id="closeSolutionViewerButton"
+                    class="solution-viewer-close"
+                    aria-label="Close solutions"
+                >
+                    &times;
+                </button>
+            </div>
+
+            <div
+                id="solutionViewerBody"
+                class="solution-viewer-body"
+            >
+                <div class="solution-viewer-loading">
+                    Loading solutions...
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- =====================================================
          MAIN JAVASCRIPT
     ====================================================== -->
@@ -551,6 +794,7 @@
     ====================================================== -->
 
     <script>
+
 
         // ====================================================
         // GET LOGGED-IN USER
@@ -679,6 +923,27 @@
             );
 
 
+        const solutionViewerOverlay =
+            document.getElementById(
+                "solutionViewerOverlay"
+            );
+
+        const solutionViewerTitle =
+            document.getElementById(
+                "solutionViewerTitle"
+            );
+
+        const solutionViewerBody =
+            document.getElementById(
+                "solutionViewerBody"
+            );
+
+        const closeSolutionViewerButton =
+            document.getElementById(
+                "closeSolutionViewerButton"
+            );
+
+
         // ====================================================
         // CHARACTER COUNTER
         // ====================================================
@@ -777,6 +1042,22 @@
             ).style.width =
                 "0%";
 
+
+            document.getElementById(
+                "classificationMode"
+            ).textContent =
+                "Waiting for classification";
+
+
+            document.getElementById(
+                "assignedDomains"
+            ).innerHTML =
+                `
+                    <span class="assigned-domain-empty">
+                        Waiting for classification...
+                    </span>
+                `;
+
         }
 
 
@@ -862,22 +1143,154 @@
 
 
         // ====================================================
+        // FORMAT CONFIDENCE
+        // ====================================================
+
+        function formatConfidence(
+            confidence
+        ) {
+
+            if (
+                confidence === null ||
+                confidence === undefined ||
+                confidence === ""
+            ) {
+
+                return null;
+
+            }
+
+
+            const number =
+                Number(confidence);
+
+
+            if (
+                Number.isNaN(number)
+            ) {
+
+                return null;
+
+            }
+
+
+            return number <= 1
+                ? number * 100
+                : number;
+
+        }
+
+
+        // ====================================================
+        // DISPLAY ASSIGNED DOMAINS
+        // ====================================================
+
+        function displayAssignedDomains(
+            domains
+        ) {
+
+            const container =
+                document.getElementById(
+                    "assignedDomains"
+                );
+
+
+            if (
+                !Array.isArray(domains) ||
+                domains.length === 0
+            ) {
+
+                container.innerHTML =
+                    `
+                        <span class="assigned-domain-empty">
+                            No additional domains assigned.
+                        </span>
+                    `;
+
+                return;
+
+            }
+
+
+            container.innerHTML =
+                domains.map(
+                    function (
+                        domain
+                    ) {
+
+                        if (
+                            typeof domain === "string"
+                        ) {
+
+                            return `
+                                <div class="assigned-domain-item">
+
+                                    <span class="assigned-domain-name">
+                                        ${escapeHtml(domain)}
+                                    </span>
+
+                                </div>
+                            `;
+
+                        }
+
+
+                        const category =
+                            domain.category ||
+                            domain.label ||
+                            domain.class ||
+                            "Unknown";
+
+
+                        const confidence =
+                            formatConfidence(
+                                domain.confidence ??
+                                domain.score ??
+                                domain.probability
+                            );
+
+
+                        const confidenceText =
+                            confidence !== null
+                                ? confidence.toFixed(2) + "%"
+                                : "N/A";
+
+
+                        return `
+                            <div class="assigned-domain-item">
+
+                                <span class="assigned-domain-name">
+                                    ${escapeHtml(category)}
+                                </span>
+
+                                <span class="assigned-domain-confidence">
+                                    ${confidenceText}
+                                </span>
+
+                            </div>
+                        `;
+
+                    }
+                )
+                .join("");
+
+        }
+
+
+        // ====================================================
         // UPDATE ML RESULT
         // ====================================================
 
         function showPrediction(
             category,
-            confidence
+            confidence,
+            assignedDomains
         ) {
 
-            const confidenceNumber =
-                Number(confidence);
-
-
             const confidencePercentage =
-                confidenceNumber <= 1
-                    ? confidenceNumber * 100
-                    : confidenceNumber;
+                formatConfidence(
+                    confidence
+                );
 
 
             document.getElementById(
@@ -887,24 +1300,82 @@
                 "Category predicted";
 
 
-            document.getElementById(
-                "confidenceValue"
-            ).textContent =
-                confidencePercentage.toFixed(2) +
-                "%";
+            if (
+                confidencePercentage !== null
+            ) {
+
+                document.getElementById(
+                    "confidenceValue"
+                ).textContent =
+                    confidencePercentage.toFixed(2) +
+                    "%";
 
 
-            document.getElementById(
-                "confidenceProgress"
-            ).style.width =
-                Math.min(
-                    Math.max(
-                        confidencePercentage,
-                        0
-                    ),
-                    100
-                ) +
-                "%";
+                document.getElementById(
+                    "confidenceProgress"
+                ).style.width =
+                    Math.min(
+                        Math.max(
+                            confidencePercentage,
+                            0
+                        ),
+                        100
+                    ) +
+                    "%";
+
+            }
+
+            else {
+
+                document.getElementById(
+                    "confidenceValue"
+                ).textContent =
+                    "N/A";
+
+
+                document.getElementById(
+                    "confidenceProgress"
+                ).style.width =
+                    "0%";
+
+            }
+
+
+            // ------------------------------------------------
+            // CLASSIFICATION MODE
+            // ------------------------------------------------
+
+            const modeElement =
+                document.getElementById(
+                    "classificationMode"
+                );
+
+
+            if (
+                confidencePercentage !== null &&
+                confidencePercentage > 60
+            ) {
+
+                modeElement.textContent =
+                    "High confidence → Single-domain assignment";
+
+            }
+
+            else {
+
+                modeElement.textContent =
+                    "Lower confidence → Multi-domain assignment";
+
+            }
+
+
+            // ------------------------------------------------
+            // ASSIGNED DOMAINS
+            // ------------------------------------------------
+
+            displayAssignedDomains(
+                assignedDomains
+            );
 
         }
 
@@ -1002,16 +1473,19 @@
                         data.success
                     ) {
 
-                        /*
-                        ------------------------------------------------
-                        HANDLE DIFFERENT BACKEND RESPONSE STRUCTURES
-                        ------------------------------------------------
-                        */
+
+                        // ------------------------------------
+                        // GET PROBLEM DATA
+                        // ------------------------------------
 
                         const problem =
                             data.problem ||
                             data;
 
+
+                        // ------------------------------------
+                        // GET PRIMARY CATEGORY
+                        // ------------------------------------
 
                         const category =
                             problem.category ||
@@ -1021,6 +1495,10 @@
                             "Predicted Category";
 
 
+                        // ------------------------------------
+                        // GET PRIMARY CONFIDENCE
+                        // ------------------------------------
+
                         const confidence =
                             problem.confidence ??
                             data.confidence ??
@@ -1029,9 +1507,24 @@
                             0;
 
 
+                        // ------------------------------------
+                        // GET ASSIGNED DOMAINS
+                        // ------------------------------------
+
+                        const assignedDomains =
+                            problem.predicted_domains ||
+                            problem.assigned_domains ||
+                            data.predicted_domains ||
+                            data.assigned_domains ||
+                            data.classification?.predicted_domains ||
+                            [];
+
+
                         /*
+                        ------------------------------------------------
                         Wait for the ML animation to complete
                         before showing the actual result.
+                        ------------------------------------------------
                         */
 
                         setTimeout(
@@ -1039,7 +1532,8 @@
 
                                 showPrediction(
                                     category,
-                                    confidence
+                                    confidence,
+                                    assignedDomains
                                 );
 
 
@@ -1149,9 +1643,9 @@
 
             myProblemsContainer.innerHTML =
                 `
-                <div class="loading-state">
-                    Loading your problems...
-                </div>
+                    <div class="loading-state">
+                        Loading your problems...
+                    </div>
                 `;
 
 
@@ -1188,9 +1682,9 @@
 
                     myProblemsContainer.innerHTML =
                         `
-                        <div class="empty-state">
-                            Unable to load your problems.
-                        </div>
+                            <div class="empty-state">
+                                Unable to load your problems.
+                            </div>
                         `;
 
                 }
@@ -1208,9 +1702,9 @@
 
                 myProblemsContainer.innerHTML =
                     `
-                    <div class="empty-state">
-                        Unable to connect to the server.
-                    </div>
+                        <div class="empty-state">
+                            Unable to connect to the server.
+                        </div>
                     `;
 
             }
@@ -1233,19 +1727,18 @@
 
                 myProblemsContainer.innerHTML =
                     `
-                    <div class="empty-state">
+                        <div class="empty-state">
 
-                        <h3>
-                            No Problems Yet
-                        </h3>
+                            <h3>
+                                No Problems Yet
+                            </h3>
 
-                        <p>
-                            Submit your first problem and the
-                            Machine Learning model will classify it.
+                            <p>
+                                Submit your first problem and the
+                                Machine Learning model will classify it.
+                            </p>
 
-                        </p>
-
-                    </div>
+                        </div>
                     `;
 
                 return;
@@ -1270,24 +1763,98 @@
                             problem.prediction_confidence;
 
 
+                        const confidenceNumber =
+                            formatConfidence(
+                                confidence
+                            );
+
+
                         const confidenceText =
-                            confidence !== undefined &&
-                            confidence !== null
-                                ? (
-                                    Number(
-                                        confidence
-                                    ) <= 1
-                                        ? (
-                                            Number(
-                                                confidence
-                                            ) * 100
-                                        ).toFixed(2)
-                                        : Number(
-                                            confidence
-                                        ).toFixed(2)
-                                ) +
-                                "%"
+                            confidenceNumber !== null
+                                ? confidenceNumber.toFixed(2) + "%"
                                 : "N/A";
+
+
+                        // ------------------------------------
+                        // ASSIGNED DOMAINS
+                        // ------------------------------------
+
+                        const assignedDomains =
+                            problem.predicted_domains ||
+                            problem.assigned_domains ||
+                            [];
+
+
+                        let domainHtml = "";
+
+
+                        if (
+                            assignedDomains.length > 0
+                        ) {
+
+                            domainHtml =
+                                assignedDomains.map(
+                                    function (
+                                        domain
+                                    ) {
+
+                                        const domainName =
+                                            typeof domain === "string"
+                                                ? domain
+                                                : (
+                                                    domain.category ||
+                                                    domain.label ||
+                                                    domain.class ||
+                                                    "Unknown"
+                                                );
+
+
+                                        const domainConfidence =
+                                            typeof domain === "string"
+                                                ? null
+                                                : formatConfidence(
+                                                    domain.confidence ??
+                                                    domain.score ??
+                                                    domain.probability
+                                                );
+
+
+                                        return `
+                                            <span class="problem-domain-tag">
+
+                                                ${escapeHtml(
+                                                    domainName
+                                                )}
+
+                                                ${
+                                                    domainConfidence !== null
+                                                        ? `
+                                                            <small>
+                                                                ${domainConfidence.toFixed(2)}%
+                                                            </small>
+                                                        `
+                                                        : ""
+                                                }
+
+                                            </span>
+                                        `;
+
+                                    }
+                                )
+                                .join("");
+
+                        }
+
+                        else {
+
+                            domainHtml =
+                                `
+                                    <span class="problem-domain-tag">
+                                        ${escapeHtml(category)}
+                                    </span>
+                                `;
+
+                        }
 
 
                         const solutionCount =
@@ -1353,6 +1920,27 @@
                                 </p>
 
 
+                                <!-- ASSIGNED DOMAINS -->
+
+                                <div
+                                    class="problem-assigned-domains"
+                                >
+
+                                    <strong>
+                                        Assigned Domains:
+                                    </strong>
+
+                                    <div
+                                        class="problem-domain-list"
+                                    >
+
+                                        ${domainHtml}
+
+                                    </div>
+
+                                </div>
+
+
                                 <div
                                     class="problem-meta"
                                 >
@@ -1365,6 +1953,20 @@
                                             ${solutionCount}
 
                                         </strong>
+
+                                        ${
+                                            solutionCount > 0
+                                                ? `
+                                                    <button
+                                                        type="button"
+                                                        class="view-solutions-button"
+                                                        onclick="viewSolutions(${Number(problem.id)}, '${escapeHtml(String(problem.title || "").replace(/'/g, "\\'") )}')"
+                                                    >
+                                                        View Solutions
+                                                    </button>
+                                                `
+                                                : ""
+                                        }
 
                                     </span>
 
@@ -1383,9 +1985,186 @@
                         `;
 
                     }
-                ).join("");
+                )
+                .join("");
 
         }
+
+
+        // ====================================================
+        // SOLUTION VIEWER
+        // ====================================================
+
+        function getSolutionText(solution) {
+            if (!solution) {
+                return "";
+            }
+
+            return solution.solution_text ??
+                solution.solution ??
+                solution.text ??
+                solution.content ??
+                "";
+        }
+
+
+        function getSolutionSubmitter(solution) {
+            if (!solution) {
+                return "Solver";
+            }
+
+            return solution.submitted_by_username ||
+                solution.solver_username ||
+                solution.username ||
+                solution.submitted_by_name ||
+                (solution.submitted_by ? "Solver #" + solution.submitted_by : "Solver");
+        }
+
+
+        function formatSolutionDate(value) {
+            if (!value) {
+                return "";
+            }
+
+            const date = new Date(value);
+
+            if (Number.isNaN(date.getTime())) {
+                return String(value);
+            }
+
+            return date.toLocaleString();
+        }
+
+
+        function closeSolutionViewer() {
+            solutionViewerOverlay.classList.add("hidden");
+            document.body.style.overflow = "";
+        }
+
+
+        async function viewSolutions(problemId, problemTitle) {
+            solutionViewerTitle.textContent =
+                problemTitle
+                    ? "Solutions — " + problemTitle
+                    : "Submitted Solutions";
+
+            solutionViewerBody.innerHTML = `
+                <div class="solution-viewer-loading">
+                    Loading submitted solutions...
+                </div>
+            `;
+
+            solutionViewerOverlay.classList.remove("hidden");
+            document.body.style.overflow = "hidden";
+
+            try {
+                const response = await fetch(
+                    "/api/problems/" + encodeURIComponent(problemId) + "/solutions"
+                );
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(
+                        data.message ||
+                        "Unable to load solutions."
+                    );
+                }
+
+                const solutions = Array.isArray(data.solutions)
+                    ? data.solutions
+                    : [];
+
+                if (solutions.length === 0) {
+                    solutionViewerBody.innerHTML = `
+                        <div class="solution-viewer-empty">
+                            No solutions have been submitted yet.
+                        </div>
+                    `;
+                    return;
+                }
+
+                solutionViewerBody.innerHTML = solutions.map(
+                    function (solution, index) {
+                        const submitter =
+                            getSolutionSubmitter(solution);
+
+                        const submittedAt =
+                            formatSolutionDate(
+                                solution.created_at ||
+                                solution.submitted_at
+                            );
+
+                        const text =
+                            getSolutionText(solution);
+
+                        return `
+                            <article class="solution-card">
+                                <div class="solution-card-header">
+                                    <strong>
+                                        Solution ${index + 1}
+                                    </strong>
+
+                                    <span>
+                                        Submitted by: ${escapeHtml(submitter)}
+                                        ${
+                                            submittedAt
+                                                ? " · " + escapeHtml(submittedAt)
+                                                : ""
+                                        }
+                                    </span>
+                                </div>
+
+                                <div class="solution-text">
+                                    ${escapeHtml(text || "No solution text available.")}
+                                </div>
+                            </article>
+                        `;
+                    }
+                ).join("");
+            }
+            catch (error) {
+                console.error(
+                    "Load solutions error:",
+                    error
+                );
+
+                solutionViewerBody.innerHTML = `
+                    <div class="solution-viewer-error">
+                        Unable to load the submitted solutions.
+                    </div>
+                `;
+            }
+        }
+
+
+        closeSolutionViewerButton.addEventListener(
+            "click",
+            closeSolutionViewer
+        );
+
+
+        solutionViewerOverlay.addEventListener(
+            "click",
+            function (event) {
+                if (event.target === solutionViewerOverlay) {
+                    closeSolutionViewer();
+                }
+            }
+        );
+
+
+        document.addEventListener(
+            "keydown",
+            function (event) {
+                if (
+                    event.key === "Escape" &&
+                    !solutionViewerOverlay.classList.contains("hidden")
+                ) {
+                    closeSolutionViewer();
+                }
+            }
+        );
 
 
         // ====================================================
@@ -1474,7 +2253,9 @@
 
         loadMyProblems();
 
+
     </script>
+
 
 </body>
 

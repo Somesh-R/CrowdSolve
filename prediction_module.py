@@ -12,7 +12,6 @@ import re
 import joblib
 import nltk
 import os
-import sys
 
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -20,19 +19,60 @@ from nltk.stem import WordNetLemmatizer
 
 
 # ============================================================
-# 2. DOWNLOAD REQUIRED NLTK DATA
+# 2. MULTI-DOMAIN CLASSIFICATION SETTINGS
 # ============================================================
 
-nltk.download("punkt", quiet=True)
-nltk.download("punkt_tab", quiet=True)
-nltk.download("stopwords", quiet=True)
-nltk.download("wordnet", quiet=True)
-nltk.download("omw-1.4", quiet=True)
+# If the highest prediction is at or above this percentage,
+# the model is considered sufficiently confident and only
+# the highest-confidence domain will be assigned.
+HIGH_CONFIDENCE_THRESHOLD = 70.0
+
+
+# When the highest prediction is below the high-confidence
+# threshold, every domain at or above this percentage can
+# be assigned.
+MULTI_DOMAIN_THRESHOLD = 15.0
+
+
+# Prevent a low-confidence problem from being assigned to
+# too many domains.
+MAX_ASSIGNED_DOMAINS = 3
 
 
 # ============================================================
-# 3. LOAD THE TRAINED MODEL AND TF-IDF VECTORIZER
+# 3. DOWNLOAD REQUIRED NLTK DATA
 # ============================================================
+
+nltk.download(
+    "punkt",
+    quiet=True
+)
+
+nltk.download(
+    "punkt_tab",
+    quiet=True
+)
+
+nltk.download(
+    "stopwords",
+    quiet=True
+)
+
+nltk.download(
+    "wordnet",
+    quiet=True
+)
+
+nltk.download(
+    "omw-1.4",
+    quiet=True
+)
+
+
+# ============================================================
+# 4. LOAD THE TRAINED MODEL AND TF-IDF VECTORIZER
+# ============================================================
+
 
 # ============================================================
 # GET THE DIRECTORY WHERE THIS FILE IS LOCATED
@@ -86,7 +126,7 @@ categories = joblib.load(
 
 
 # ============================================================
-# 4. INITIALIZE TEXT PREPROCESSING COMPONENTS
+# 5. INITIALIZE TEXT PREPROCESSING COMPONENTS
 # ============================================================
 
 stop_words = set(
@@ -97,12 +137,15 @@ lemmatizer = WordNetLemmatizer()
 
 
 # ============================================================
-# 5. TEXT PREPROCESSING FUNCTION
+# 6. TEXT PREPROCESSING FUNCTION
 # ============================================================
 
 def preprocess_text(text):
 
+    # --------------------------------------------------------
     # Convert to lowercase
+    # --------------------------------------------------------
+
     text = text.lower()
 
 
@@ -151,7 +194,9 @@ def preprocess_text(text):
     # TOKENIZATION
     # --------------------------------------------------------
 
-    tokens = word_tokenize(text)
+    tokens = word_tokenize(
+        text
+    )
 
 
     # --------------------------------------------------------
@@ -187,17 +232,168 @@ def preprocess_text(text):
     # JOIN WORDS BACK INTO TEXT
     # --------------------------------------------------------
 
-    return " ".join(tokens)
+    return " ".join(
+        tokens
+    )
 
 
 # ============================================================
-# 6. MAIN PREDICTION FUNCTION
+# 7. DETERMINE ASSIGNED DOMAINS
+# ============================================================
+
+def determine_assigned_domains(
+    probabilities,
+    classes
+):
+
+    """
+    Determine whether a problem should be assigned to one
+    domain or multiple domains.
+
+    Rules:
+
+        Highest confidence >= 70%
+            -> assign only the highest-confidence domain.
+
+        Highest confidence < 70%
+            -> assign all domains with confidence >= 15%.
+
+        Maximum assigned domains
+            -> 3
+
+    Parameters:
+        probabilities:
+            Probability values returned by model.predict_proba().
+
+        classes:
+            Model category/class names.
+
+    Returns:
+        list:
+            A list of dictionaries containing category
+            and confidence.
+    """
+
+
+    # --------------------------------------------------------
+    # SORT ALL PREDICTIONS FROM HIGHEST TO LOWEST
+    # --------------------------------------------------------
+
+    sorted_indices = probabilities.argsort()[::-1]
+
+
+    # --------------------------------------------------------
+    # GET HIGHEST CONFIDENCE
+    # --------------------------------------------------------
+
+    highest_confidence = (
+        probabilities[sorted_indices[0]]
+        * 100
+    )
+
+
+    # --------------------------------------------------------
+    # HIGH-CONFIDENCE CASE
+    # --------------------------------------------------------
+
+    if highest_confidence > HIGH_CONFIDENCE_THRESHOLD:
+
+        top_index = sorted_indices[0]
+
+        return [
+
+            {
+                "category": classes[top_index],
+                "confidence": round(
+                    probabilities[top_index] * 100,
+                    2
+                )
+            }
+
+        ]
+
+
+    # --------------------------------------------------------
+    # LOW-CONFIDENCE CASE
+    # --------------------------------------------------------
+
+    assigned_domains = []
+
+
+    for index in sorted_indices:
+
+        confidence = (
+            probabilities[index]
+            * 100
+        )
+
+
+        # ----------------------------------------------------
+        # Only include domains at or above the threshold
+        # ----------------------------------------------------
+
+        if confidence >= MULTI_DOMAIN_THRESHOLD:
+
+            assigned_domains.append(
+
+                {
+                    "category": classes[index],
+
+                    "confidence": round(
+                        confidence,
+                        2
+                    )
+                }
+
+            )
+
+
+        # ----------------------------------------------------
+        # Stop after maximum allowed domains
+        # ----------------------------------------------------
+
+        if len(assigned_domains) >= MAX_ASSIGNED_DOMAINS:
+
+            break
+
+
+    # --------------------------------------------------------
+    # SAFETY FALLBACK
+    # --------------------------------------------------------
+
+    # The highest prediction should normally always be above
+    # 15%. This fallback guarantees that at least one domain
+    # is assigned if the probability distribution is unusual.
+
+    if not assigned_domains:
+
+        top_index = sorted_indices[0]
+
+        assigned_domains.append(
+
+            {
+                "category": classes[top_index],
+
+                "confidence": round(
+                    probabilities[top_index] * 100,
+                    2
+                )
+            }
+
+        )
+
+
+    return assigned_domains
+
+
+# ============================================================
+# 8. MAIN PREDICTION FUNCTION
 # ============================================================
 
 def predict_problem(problem_text):
 
     """
-    Predict the category of a new problem.
+    Predict the category/domain(s) of a new problem.
 
     Parameters:
         problem_text (str):
@@ -205,8 +401,14 @@ def predict_problem(problem_text):
 
     Returns:
         dict:
-            Contains the original problem, processed text,
-            predicted category, confidence, and top 3 predictions.
+            Contains:
+
+            - original_problem
+            - cleaned_problem
+            - predicted_category
+            - confidence
+            - top_predictions
+            - predicted_domains
     """
 
 
@@ -214,7 +416,10 @@ def predict_problem(problem_text):
     # VALIDATE INPUT
     # --------------------------------------------------------
 
-    if not isinstance(problem_text, str):
+    if not isinstance(
+        problem_text,
+        str
+    ):
 
         raise ValueError(
             "Problem text must be a string."
@@ -247,7 +452,7 @@ def predict_problem(problem_text):
 
 
     # --------------------------------------------------------
-    # STEP 3: PREDICT CATEGORY
+    # STEP 3: PREDICT PRIMARY CATEGORY
     # --------------------------------------------------------
 
     prediction = model.predict(
@@ -265,12 +470,13 @@ def predict_problem(problem_text):
 
 
     # --------------------------------------------------------
-    # STEP 5: GET CONFIDENCE
+    # STEP 5: GET HIGHEST CONFIDENCE
     # --------------------------------------------------------
 
-    confidence = max(
-        probabilities
-    ) * 100
+    confidence = (
+        max(probabilities)
+        * 100
+    )
 
 
     # --------------------------------------------------------
@@ -284,20 +490,35 @@ def predict_problem(problem_text):
 
     for index in top_indices:
 
-        top_predictions.append({
+        top_predictions.append(
 
-            "category": model.classes_[index],
+            {
+                "category": model.classes_[index],
 
-            "confidence": round(
-                probabilities[index] * 100,
-                2
-            )
+                "confidence": round(
+                    probabilities[index] * 100,
+                    2
+                )
+            }
 
-        })
+        )
 
 
     # --------------------------------------------------------
-    # RETURN COMPLETE RESULT
+    # STEP 7: DETERMINE ASSIGNED DOMAINS
+    # --------------------------------------------------------
+
+    predicted_domains = determine_assigned_domains(
+
+        probabilities,
+
+        model.classes_
+
+    )
+
+
+    # --------------------------------------------------------
+    # STEP 8: RETURN COMPLETE RESULT
     # --------------------------------------------------------
 
     result = {
@@ -306,14 +527,20 @@ def predict_problem(problem_text):
 
         "cleaned_problem": cleaned_problem,
 
+        # Primary/top prediction
         "predicted_category": prediction,
 
+        # Highest model confidence
         "confidence": round(
             confidence,
             2
         ),
 
-        "top_predictions": top_predictions
+        # Top 3 model predictions
+        "top_predictions": top_predictions,
+
+        # Actual domains assigned to the problem
+        "predicted_domains": predicted_domains
 
     }
 
@@ -322,18 +549,25 @@ def predict_problem(problem_text):
 
 
 # ============================================================
-# 7. DISPLAY RESULT FUNCTION
+# 9. DISPLAY RESULT FUNCTION
 # ============================================================
 
 def display_prediction(result):
 
     print("\n")
-    print("=" * 70)
-
-    print("PROBLEM CLASSIFICATION RESULT")
 
     print("=" * 70)
 
+    print(
+        "PROBLEM CLASSIFICATION RESULT"
+    )
+
+    print("=" * 70)
+
+
+    # --------------------------------------------------------
+    # ORIGINAL PROBLEM
+    # --------------------------------------------------------
 
     print("\nOriginal Problem:")
 
@@ -342,6 +576,10 @@ def display_prediction(result):
     )
 
 
+    # --------------------------------------------------------
+    # PREPROCESSED PROBLEM
+    # --------------------------------------------------------
+
     print("\nPreprocessed Problem:")
 
     print(
@@ -349,12 +587,20 @@ def display_prediction(result):
     )
 
 
-    print("\nPredicted Category:")
+    # --------------------------------------------------------
+    # PRIMARY PREDICTED CATEGORY
+    # --------------------------------------------------------
+
+    print("\nPrimary Predicted Category:")
 
     print(
         result["predicted_category"]
     )
 
+
+    # --------------------------------------------------------
+    # PRIMARY CONFIDENCE
+    # --------------------------------------------------------
 
     print("\nPrediction Confidence:")
 
@@ -363,12 +609,19 @@ def display_prediction(result):
     )
 
 
+    # --------------------------------------------------------
+    # TOP 3 PREDICTIONS
+    # --------------------------------------------------------
+
     print("\nTop 3 Predictions:")
 
 
     for i, prediction in enumerate(
+
         result["top_predictions"],
+
         start=1
+
     ):
 
         print(
@@ -381,18 +634,67 @@ def display_prediction(result):
         )
 
 
-    print("\n" + "=" * 70)
+    # --------------------------------------------------------
+    # ASSIGNED DOMAINS
+    # --------------------------------------------------------
+
+    print("\nAssigned Domain(s):")
+
+
+    for i, domain in enumerate(
+
+        result["predicted_domains"],
+
+        start=1
+
+    ):
+
+        print(
+
+            f"{i}. "
+            f"{domain['category']} "
+            f"→ "
+            f"{domain['confidence']}%"
+
+        )
+
+
+    # --------------------------------------------------------
+    # CLASSIFICATION MODE
+    # --------------------------------------------------------
+
+    print("\nClassification Mode:")
+
+
+    if result["confidence"] >= HIGH_CONFIDENCE_THRESHOLD:
+
+        print(
+            "High confidence → Single-domain assignment"
+        )
+
+    else:
+
+        print(
+            "Low confidence → Multi-domain assignment"
+        )
+
+
+    print(
+        "\n" + "=" * 70
+    )
 
 
 # ============================================================
-# 8. TEST THE MODULE
+# 10. TEST THE MODULE
 # ============================================================
 
 if __name__ == "__main__":
 
     print("=" * 70)
 
-    print("REUSABLE PREDICTION MODULE TEST")
+    print(
+        "REUSABLE PREDICTION MODULE TEST"
+    )
 
     print("=" * 70)
 
@@ -407,7 +709,9 @@ if __name__ == "__main__":
 
         "How do I create middleware in an Express.js application?",
 
-        "Why is my TypeScript interface giving me a type error?"
+        "Why is my TypeScript interface giving me a type error?",
+
+        "In login page how to assign a button to a hyperlink?"
 
     ]
 
@@ -425,4 +729,6 @@ if __name__ == "__main__":
 
     print("\n")
 
-    print("PREDICTION MODULE TEST COMPLETED SUCCESSFULLY")
+    print(
+        "PREDICTION MODULE TEST COMPLETED SUCCESSFULLY"
+    )

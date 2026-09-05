@@ -11,6 +11,7 @@
 #   - Categories
 # ============================================================
 
+
 import os
 import sys
 from functools import wraps
@@ -157,7 +158,6 @@ def get_request_user():
         silent=True
     ) or {}
 
-
     user_id = (
 
         data.get("user_id")
@@ -168,11 +168,9 @@ def get_request_user():
 
     )
 
-
     if not user_id:
 
         return None
-
 
     try:
 
@@ -186,7 +184,6 @@ def get_request_user():
     ):
 
         return None
-
 
     return User.query.get(
         user_id
@@ -228,14 +225,12 @@ def register_user():
             silent=True
         )
 
-
         if not data:
 
             return error_response(
                 "No registration data received.",
                 400
             )
-
 
         username = str(
             data.get(
@@ -244,7 +239,6 @@ def register_user():
             )
         ).strip()
 
-
         email = str(
             data.get(
                 "email",
@@ -252,14 +246,12 @@ def register_user():
             )
         ).strip().lower()
 
-
         password = str(
             data.get(
                 "password",
                 ""
             )
         )
-
 
         role = str(
             data.get(
@@ -280,14 +272,12 @@ def register_user():
                 400
             )
 
-
         if not email:
 
             return error_response(
                 "Email is required.",
                 400
             )
-
 
         if not password:
 
@@ -296,14 +286,12 @@ def register_user():
                 400
             )
 
-
         if len(password) < 6:
 
             return error_response(
                 "Password must contain at least 6 characters.",
                 400
             )
-
 
         if role not in [
             "solver",
@@ -328,7 +316,6 @@ def register_user():
             .first()
         )
 
-
         if existing_username:
 
             return error_response(
@@ -348,7 +335,6 @@ def register_user():
             )
             .first()
         )
-
 
         if existing_email:
 
@@ -385,19 +371,16 @@ def register_user():
 
         )
 
-
         db.session.add(
             user
         )
 
         db.session.commit()
 
-
         print(
             f"New user registered: "
             f"{username} ({role})"
         )
-
 
         return jsonify({
 
@@ -416,12 +399,10 @@ def register_user():
 
         db.session.rollback()
 
-
         print(
             "REGISTRATION ERROR:",
             error
         )
-
 
         return error_response(
             "Registration failed.",
@@ -476,7 +457,6 @@ def login_user():
             silent=True
         )
 
-
         if not data:
 
             return error_response(
@@ -507,11 +487,9 @@ def login_user():
 
         )
 
-
         identifier = str(
             identifier
         ).strip()
-
 
         password = str(
             data.get(
@@ -527,7 +505,6 @@ def login_user():
                 "Email or username is required.",
                 400
             )
-
 
         if not password:
 
@@ -623,7 +600,6 @@ def login_user():
             error
         )
 
-
         return error_response(
             "An error occurred during login.",
             500
@@ -709,16 +685,6 @@ def classify_problem_text(
     # --------------------------------------------------------
     # NORMALIZE RESULT
     # --------------------------------------------------------
-    # The prediction module created earlier returns:
-    #
-    # predicted_category
-    # confidence
-    # top_predictions
-    # preprocessed_problem
-    #
-    # This section also handles alternative key names
-    # so the API remains robust.
-    # --------------------------------------------------------
 
     if not isinstance(
         result,
@@ -785,6 +751,30 @@ def classify_problem_text(
     )
 
 
+    # --------------------------------------------------------
+    # NEW:
+    # GET ASSIGNED DOMAINS FROM ML MODULE
+    # --------------------------------------------------------
+
+    predicted_domains = (
+
+        result.get(
+            "predicted_domains"
+        )
+
+        or
+
+        result.get(
+            "assigned_domains"
+        )
+
+        or
+
+        []
+
+    )
+
+
     cleaned_text = (
 
         result.get(
@@ -827,14 +817,12 @@ def classify_problem_text(
             confidence
         )
 
-
         # If model returned 0.9686,
         # convert to 96.86.
 
         if confidence <= 1:
 
             confidence *= 100
-
 
         confidence = round(
             confidence,
@@ -881,6 +869,127 @@ def classify_problem_text(
 
                 )
 
+                score = (
+
+                    item.get(
+                        "confidence"
+                    )
+
+                    or
+
+                    item.get(
+                        "score"
+                    )
+
+                    or
+
+                    item.get(
+                        "probability"
+                    )
+
+                )
+
+
+                if category:
+
+                    if score is not None:
+
+                        score = float(
+                            score
+                        )
+
+                        if score <= 1:
+
+                            score *= 100
+
+                        score = round(
+                            score,
+                            2
+                        )
+
+
+                    normalized_predictions.append({
+
+                        "category":
+                            category,
+
+                        "confidence":
+                            score
+
+                    })
+
+
+            elif isinstance(
+                item,
+                (list, tuple)
+            ):
+
+                if len(item) >= 2:
+
+                    category = str(
+                        item[0]
+                    )
+
+                    score = float(
+                        item[1]
+                    )
+
+                    if score <= 1:
+
+                        score *= 100
+
+                    normalized_predictions.append({
+
+                        "category":
+                            category,
+
+                        "confidence":
+                            round(
+                                score,
+                                2
+                            )
+
+                    })
+
+
+    # --------------------------------------------------------
+    # NORMALIZE PREDICTED DOMAINS
+    # --------------------------------------------------------
+
+    normalized_domains = []
+
+
+    if isinstance(
+        predicted_domains,
+        list
+    ):
+
+        for item in predicted_domains:
+
+            if isinstance(
+                item,
+                dict
+            ):
+
+                category = (
+
+                    item.get(
+                        "category"
+                    )
+
+                    or
+
+                    item.get(
+                        "label"
+                    )
+
+                    or
+
+                    item.get(
+                        "class"
+                    )
+
+                )
 
                 score = (
 
@@ -911,11 +1020,9 @@ def classify_problem_text(
                             score
                         )
 
-
                         if score <= 1:
 
                             score *= 100
-
 
                         score = round(
                             score,
@@ -923,7 +1030,7 @@ def classify_problem_text(
                         )
 
 
-                    normalized_predictions.append({
+                    normalized_domains.append({
 
                         "category":
                             category,
@@ -932,6 +1039,7 @@ def classify_problem_text(
                             score
 
                     })
+
 
             elif isinstance(
                 item,
@@ -944,18 +1052,15 @@ def classify_problem_text(
                         item[0]
                     )
 
-
                     score = float(
                         item[1]
                     )
-
 
                     if score <= 1:
 
                         score *= 100
 
-
-                    normalized_predictions.append({
+                    normalized_domains.append({
 
                         "category":
                             category,
@@ -969,6 +1074,47 @@ def classify_problem_text(
                     })
 
 
+            elif isinstance(
+                item,
+                str
+            ):
+
+                normalized_domains.append({
+
+                    "category":
+                        item,
+
+                    "confidence":
+                        None
+
+                })
+
+
+    # --------------------------------------------------------
+    # SAFETY FALLBACK
+    # --------------------------------------------------------
+    # If the ML module does not return predicted_domains,
+    # use the primary prediction as the assigned domain.
+    #
+    # This keeps the API backward-compatible.
+
+    if not normalized_domains:
+
+        normalized_domains.append({
+
+            "category":
+                predicted_category,
+
+            "confidence":
+                confidence
+
+        })
+
+
+    # --------------------------------------------------------
+    # RETURN COMPLETE NORMALIZED RESULT
+    # --------------------------------------------------------
+
     return {
 
         "predicted_category":
@@ -979,6 +1125,9 @@ def classify_problem_text(
 
         "top_predictions":
             normalized_predictions,
+
+        "predicted_domains":
+            normalized_domains,
 
         "cleaned_text":
             cleaned_text
@@ -1002,7 +1151,6 @@ def create_problem():
             silent=True
         )
 
-
         if not data:
 
             return error_response(
@@ -1022,14 +1170,12 @@ def create_problem():
             )
         ).strip()
 
-
         description = str(
             data.get(
                 "description",
                 ""
             )
         ).strip()
-
 
         user_id = (
 
@@ -1057,14 +1203,12 @@ def create_problem():
                 400
             )
 
-
         if not description:
 
             return error_response(
                 "Problem description is required.",
                 400
             )
-
 
         if not user_id:
 
@@ -1099,14 +1243,12 @@ def create_problem():
             user_id
         )
 
-
         if not user:
 
             return error_response(
                 "User not found.",
                 404
             )
-
 
         if user.role != "problemer":
 
@@ -1153,19 +1295,37 @@ def create_problem():
 
 
         print(
-            "Predicted Category:",
+            "Primary Predicted Category:",
             ml_result[
                 "predicted_category"
             ]
         )
 
-
         print(
-            "Confidence:",
+            "Primary Confidence:",
             ml_result[
                 "confidence"
             ]
         )
+
+
+        print(
+            "Assigned Domain(s):"
+        )
+
+
+        for domain in ml_result[
+            "predicted_domains"
+        ]:
+
+            print(
+
+                f"  - "
+                f"{domain['category']} "
+                f"→ "
+                f"{domain['confidence']}%"
+
+            )
 
 
         # ----------------------------------------------------
@@ -1196,6 +1356,11 @@ def create_problem():
             top_predictions=
                 ml_result[
                     "top_predictions"
+                ],
+
+            predicted_domains=
+                ml_result[
+                    "predicted_domains"
                 ],
 
             created_by=user.id,
@@ -1249,6 +1414,11 @@ def create_problem():
                         "top_predictions"
                     ],
 
+                "predicted_domains":
+                    ml_result[
+                        "predicted_domains"
+                    ],
+
                 "cleaned_text":
                     ml_result[
                         "cleaned_text"
@@ -1263,7 +1433,6 @@ def create_problem():
 
         db.session.rollback()
 
-
         print(
             "\nPROBLEM CREATION ERROR:"
         )
@@ -1271,7 +1440,6 @@ def create_problem():
         print(
             error
         )
-
 
         return jsonify({
 
@@ -1321,7 +1489,6 @@ def get_problems():
 
         )
 
-
         problems = query.all()
 
 
@@ -1347,7 +1514,21 @@ def get_problems():
 
             problem_data[
                 "prediction_confidence"
-            ] = problem.confidence
+            ] = (
+                float(problem.confidence)
+                if problem.confidence is not None
+                else None
+            )
+
+
+            # Explicit assigned domains alias
+            problem_data[
+                "assigned_domains"
+            ] = (
+                problem.predicted_domains
+                if problem.predicted_domains
+                else []
+            )
 
 
             problem_list.append(
@@ -1374,7 +1555,6 @@ def get_problems():
             "GET PROBLEMS ERROR:",
             error
         )
-
 
         return error_response(
             "Unable to retrieve problems.",
@@ -1419,7 +1599,20 @@ def get_single_problem(
 
         problem_data[
             "prediction_confidence"
-        ] = problem.confidence
+        ] = (
+            float(problem.confidence)
+            if problem.confidence is not None
+            else None
+        )
+
+
+        problem_data[
+            "assigned_domains"
+        ] = (
+            problem.predicted_domains
+            if problem.predicted_domains
+            else []
+        )
 
 
         return jsonify({
@@ -1438,7 +1631,6 @@ def get_single_problem(
             "GET SINGLE PROBLEM ERROR:",
             error
         )
-
 
         return error_response(
             "Unable to retrieve problem.",
@@ -1462,7 +1654,6 @@ def submit_solution():
             silent=True
         )
 
-
         if not data:
 
             return error_response(
@@ -1474,7 +1665,6 @@ def submit_solution():
         problem_id = data.get(
             "problem_id"
         )
-
 
         submitted_by = (
 
@@ -1489,7 +1679,6 @@ def submit_solution():
             )
 
         )
-
 
         solution_text = (
 
@@ -1509,7 +1698,6 @@ def submit_solution():
 
         )
 
-
         solution_text = str(
             solution_text
         ).strip()
@@ -1526,14 +1714,12 @@ def submit_solution():
                 400
             )
 
-
         if not submitted_by:
 
             return error_response(
                 "Solver user ID is required.",
                 400
             )
-
 
         if not solution_text:
 
@@ -1572,7 +1758,6 @@ def submit_solution():
             problem_id
         )
 
-
         if not problem:
 
             return error_response(
@@ -1589,14 +1774,12 @@ def submit_solution():
             submitted_by
         )
 
-
         if not solver:
 
             return error_response(
                 "Solver not found.",
                 404
             )
-
 
         if solver.role != "solver":
 
@@ -1652,12 +1835,10 @@ def submit_solution():
 
         db.session.rollback()
 
-
         print(
             "SOLUTION SUBMISSION ERROR:",
             error
         )
-
 
         return error_response(
             "Unable to submit solution.",
@@ -1736,7 +1917,6 @@ def get_problem_solutions(
             "GET SOLUTIONS ERROR:",
             error
         )
-
 
         return error_response(
             "Unable to retrieve solutions.",
@@ -1824,7 +2004,6 @@ def get_my_problems():
             "MY PROBLEMS ERROR:",
             error
         )
-
 
         return error_response(
             "Unable to retrieve your problems.",
